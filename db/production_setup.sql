@@ -1,0 +1,4 @@
+CREATE DATABASE cinephilia_production;
+CREATE DATABASE cinephilia_production_cache;
+CREATE DATABASE cinephilia_production_queue;
+CREATE DATABASE cinephilia_production_cable;
