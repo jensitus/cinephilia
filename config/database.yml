@@ -87,7 +87,7 @@ production:
     <<: *default
     database: cinephilia_production
     username: cinephilia_production
-    password: <%= ENV["CINEPHILIA_POSTGRES_PASSWORD"] %>
+    password: <%= ENV["POSTGRES_PASSWORD"] %>
     host: <%= ENV["DB_HOST"] %>
   cache:
     <<: *primary_production
