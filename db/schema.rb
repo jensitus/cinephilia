@@ -10,9 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_19_182723) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_20_143710) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "movies", force: :cascade do |t|
+    t.string "movie_id"
+    t.string "title"
+    t.text "description"
+    t.string "year"
+    t.string "countries"
+    t.string "poster_path"
+    t.string "actors"
+    t.string "director"
+    t.string "tmdb_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["movie_id"], name: "index_movies_on_movie_id", unique: true
+  end
 
   create_table "posts", force: :cascade do |t|
     t.string "title"
