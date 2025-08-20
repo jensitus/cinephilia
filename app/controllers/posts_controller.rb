@@ -4,7 +4,6 @@ class PostsController < ApplicationController
   # GET /posts or /posts.json
   def index
     @posts = Post.all
-    @tmdb_token = Rails.configuration.tmdb_token
   end
 
   # GET /posts/1 or /posts/1.json
