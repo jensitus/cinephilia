@@ -1,2 +1,43 @@
-<h1>Cinemas#show</h1>
-<p>Find me in app/views/cinemas/show.html.erb</p>
+<div class="container">
+  <p style="color: green"><%= notice %></p>
+
+  <div class="col-xl-12">
+    <div class="row">
+      <div class="col-xl-6">
+        <%= render @cinema %>
+        <div class="mt-5">
+          <% @cinema_schedules.each do |date, mov| %>
+            <div class="row">
+              <div class="col p-2 mb-2 bg-secondary text-white rounded">
+                <%= date %>
+              </div>
+            </div>
+
+            <% mov.each do |movie_title, schedule| %>
+              <div class="row border-bottom p-1">
+                <div class="col-1">
+                  <%= image_tag("https://image.tmdb.org/t/p/w500" + schedule[0].movie.poster_path, width: "130%") unless schedule[0].movie.poster_path == nil %>
+                </div>
+                <div class="col-11">
+                  <%= link_to movie_title, "/movies/" + schedule[0].movie_id.to_s %>
+                  <br>
+                  <% schedule.each do |schedule_value| %>
+                    <%= schedule_value.time.in_time_zone("Vienna").strftime("%H:%M") %>
+                    <span class="text-secondary small">
+                      <%= schedule_value.info %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+
+        <div>
+          <%= link_to "Back to cinemas", cinemas_path %>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

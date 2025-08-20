@@ -1,8 +1,9 @@
 Rails.application.routes.draw do
-  get "cinemas/index"
-  get "cinemas/show"
-  get "movies/index"
-  get "movies/show"
+  get "fetch_movies/get"
+  get "/cinemas", to: "cinemas#index", as: "cinemas"
+  get "/cinemas/:id", to: "cinemas#show", as: "cinema"
+  get "/movies", to: "movies#index", as: "movies"
+  get "/movies/:id", to: "movies#show", as: "movie"
   resources :posts
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

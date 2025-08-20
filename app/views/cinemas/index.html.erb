@@ -1,2 +1,32 @@
-<h1>Cinemas#index</h1>
-<p>Find me in app/views/cinemas/index.html.erb</p>
+<div class="container">
+  <p style="color: green"><%= notice %></p>
+
+  <% content_for :title, "Cinemas" %>
+
+  <h1>Cinemas</h1>
+
+  <div id="cinemas">
+    <% @cinemas.each do |cinema| %>
+      <div class="row">
+        <div class="col-md-5 mt-3">
+          <div>
+            <strong>
+              <%= link_to cinema.title, cinema %>
+            </strong>
+          </div>
+
+          <div>
+            <strong>County:</strong>
+            <%= cinema.county %>
+          </div>
+
+          <div>
+            <strong>Web:</strong>
+            <%= cinema.uri %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+</div>

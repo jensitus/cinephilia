@@ -13,6 +13,8 @@
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
+    <%= favicon_link_tag asset_path('/images/favicon.ico') %>
+
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
@@ -23,6 +25,22 @@
   </head>
 
   <body>
+  <nav class="navbar fixed-top bg-warning">
+    <div class="container-fluid">
+      <div class="navbar-text">
+      <span style="font-family: 'Baloo Bhaijaan',serif; font-weight: bold; font-size: x-large">
+        Kino Wien
+      </span>
+        <span class="m-3">
+        <a href="/cinemas">Cinemas</a>
+      </span>
+        <span class="m2">
+        <a href="/movies">Movies</a>
+      </span>
+      </div>
+
+    </div>
+  </nav>
     <%= yield %>
   </body>
 </html>
