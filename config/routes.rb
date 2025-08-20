@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "cinemas/index"
+  get "cinemas/show"
   get "movies/index"
   get "movies/show"
   resources :posts
