@@ -2,3 +2,12 @@ body {
     margin-top: 100px;
     margin-bottom: 100px;
 }
+
+.do_not_underline {
+    text-decoration: none;
+}
+
+.more {
+    text-decoration: none;
+    font-size: small;
+}

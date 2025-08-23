@@ -1,0 +1,36 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-3 m-2">
+      <%= image_tag "/cinephilia_logo.png", width: 250 %>
+    </div>
+    <div class="col-md-8">
+      <% @movie_hash.each do |key, value| %>
+        <div class="row mb-1">
+          <div class="col p-2 m-2 bg-secondary text-white rounded">
+            <b><%= key %></b>
+          </div>
+        </div>
+
+        <% value.each do |v| %>
+          <div class="row mb-4">
+            <div class="col-md-12">
+              <div>
+                <%= image_tag("https://image.tmdb.org/t/p/w500" + v.poster_path, width: "80", class: "float-start me-3") unless v.poster_path.nil? %>
+              </div>
+              <div>
+                <%= link_to v.title, "/movies/" + v.id.to_s %>
+              </div>
+              <div>
+                <%= truncate_and_link(v.description, length: 250, url: "/movies/" + v.id.to_s) %>
+              </div>
+            </div>
+          </div>
+
+
+        <% end %>
+      <% end %>
+    </div>
+
+  </div>
+
+</div>

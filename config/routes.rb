@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "start_page/home"
   get "fetch_movies/get"
   get "/cinemas", to: "cinemas#index", as: "cinemas"
   get "/cinemas/:id", to: "cinemas#show", as: "cinema"
@@ -17,5 +18,5 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
-  root "movies#index"
+  root "start_page#home"
 end

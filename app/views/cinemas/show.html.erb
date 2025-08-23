@@ -15,8 +15,8 @@
 
             <% mov.each do |movie_title, schedule| %>
               <div class="row border-bottom p-1">
-                <div class="col-1">
-                  <%= image_tag("https://image.tmdb.org/t/p/w500" + schedule[0].movie.poster_path, width: "130%") unless schedule[0].movie.poster_path == nil %>
+                <div class="col-1 p-1">
+                  <%= image_tag("https://image.tmdb.org/t/p/w500" + schedule[0].movie.poster_path, width: "100%") unless schedule[0].movie.poster_path == nil %>
                 </div>
                 <div class="col-11">
                   <%= link_to movie_title, "/movies/" + schedule[0].movie_id.to_s %>
@@ -33,7 +33,7 @@
           <% end %>
         </div>
 
-        <div>
+        <div class="mt-5">
           <%= link_to "Back to cinemas", cinemas_path %>
         </div>
       </div>

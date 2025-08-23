@@ -7,10 +7,12 @@
       <div id="movies">
         <% @movies.each do |movie| %>
           <div class="row mt-2">
-            <div class="col">
+            <div class="col-2">
               <% if movie.poster_path != nil %>
-                <%= image_tag("https://image.tmdb.org/t/p/w500" + movie.poster_path, width: "10%", class: "float-start me-3")  %>
+                <%= image_tag("https://image.tmdb.org/t/p/w500" + movie.poster_path, width: "100%", class: "float-start me-3") %>
               <% end %>
+            </div>
+            <div class="col-10">
               <%= movie.title %>
               <p>
                 <%= link_to "Show this movie", movie %>
