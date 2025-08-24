@@ -1,4 +1,6 @@
 class Movie < ApplicationRecord
+  include TmdbUtility
+
   require 'nokogiri'
   require 'open-uri'
   require "net/http"
@@ -25,26 +27,18 @@ class Movie < ApplicationRecord
   end
 
   def self.delete_old_schedules(date)
-    Schedule.all.each do |schedule|
-      today = Date.today
-      if schedule.time.to_date < today
-        schedule.delete
-      end
-    end
+    schedules_to_delete = Schedule.where("time < ?", Date.today)
+    schedules_to_delete.destroy_all unless schedules_to_delete.empty?
   end
 
   def self.delete_movies_without_schedules
-    Movie.all.each do |movie|
-      if movie.schedules.empty?
-        movie.delete
-      end
-    end
+    Movie.left_outer_joins(:schedules).where(schedules: { id: nil }).find_each(&:destroy)
   end
 
   def self.fetch_movie(url)
 
 =begin
-    file = File.read("./public/perfect.json")
+    file = File.read("./public/2025-08-28.json")
     result = JSON.parse(file)
 =end
 
@@ -66,18 +60,22 @@ class Movie < ApplicationRecord
   private
 
   def self.find_or_create_movie(movie_string_id, film_at_uri, movie_title)
-    movie_exists = Movie.where(movie_id: movie_string_id).exists?
-    if movie_exists == true
-      movie_created = Movie.find_by(movie_id: movie_string_id)
-      tmdb_id = movie_created.tmdb_id
-      if movie_created.tmdb_id.nil?
-        get_additional_info_for_movie(movie_created, film_at_uri)
-      end
-    else
-      movie_created = Movie.create!(movie_id: movie_string_id, title: movie_title)
-      get_additional_info_for_movie(movie_created, film_at_uri)
-    end
-    movie_created
+    movie = Movie.find_or_initialize_by(movie_id: movie_string_id)
+    movie.title = movie_title if movie.new_record?
+    get_additional_info_for_movie(movie, film_at_uri)
+    movie.save if movie.changed?
+    movie
+    # if movie_exists == true
+    #   movie_created = Movie.find_by(movie_id: movie_string_id)
+    #   tmdb_id = movie_created.tmdb_id
+    #   if movie_created.tmdb_id.nil?
+    #     get_additional_info_for_movie(movie_created, film_at_uri)
+    #   end
+    # else
+    #   movie_created = Movie.create!(movie_id: movie_string_id, title: movie_title)
+    #   get_additional_info_for_movie(movie_created, film_at_uri)
+    # end
+    # movie_created
   end
 
   def self.get_cinema_and_schedule(movie_json, movie_id)
@@ -138,8 +136,8 @@ class Movie < ApplicationRecord
           description = get_additional_info_from_tmdb(tmdb_id.to_s, "overview")
           poster_path = get_additional_info_from_tmdb(tmdb_id.to_s, "poster_path")
           credits = get_cast(tmdb_id.to_s)
-          set_cast_to_movie(movie, credits["cast"])
-          set_crew_to_movie(movie, credits["crew"])
+          set_attributes_to_movie(movie, credits["cast"], "cast")
+          set_attributes_to_movie(movie, credits["crew"], "crew")
         end
         movie.update(tmdb_id: tmdb_id) unless tmdb_id == nil
         movie.update(description: description) unless description == nil
@@ -158,25 +156,48 @@ class Movie < ApplicationRecord
     end
   end
 
-  def self.set_cast_to_movie(movie, cast)
-    actors = ""
-    cast.each do |c|
-      if c["known_for_department"] == "Acting"
-        actors << c["name"] + ", "
+  def self.set_attributes_to_movie(movie, attribute_data, type)
+    case type
+    when "cast"
+      actors = ""
+      attribute_data.each do |c|
+        if c["known_for_department"] == "Acting"
+          actors << c["name"] + ", "
+        end
       end
+      movie.update(actors: actors.chomp(", "))
+    when "crew"
+      director = ""
+      attribute_data.each do |c|
+        if c["known_for_department"] == "Directing" and c["job"] == "Director"
+          director << c["name"] + ", "
+        end
+      end
+      movie.update(director: director.chomp(", "))
+    else
+      # type code here
     end
-    movie.update(actors: actors.chomp(", "))
   end
 
-  def self.set_crew_to_movie(movie, crew)
-    director = ""
-    crew.each do |c|
-      if c["known_for_department"] == "Directing" and c["job"] == "Director"
-        director << c["name"] + ", "
-      end
-    end
-    movie.update(director: director.chomp(", "))
-  end
+  # def self.set_cast_to_movie(movie, cast)
+  #   actors = ""
+  #   cast.each do |c|
+  #     if c["known_for_department"] == "Acting"
+  #       actors << c["name"] + ", "
+  #     end
+  #   end
+  #   movie.update(actors: actors.chomp(", "))
+  # end
+  #
+  # def self.set_crew_to_movie(movie, crew)
+  #   director = ""
+  #   crew.each do |c|
+  #     if c["known_for_department"] == "Directing" and c["job"] == "Director"
+  #       director << c["name"] + ", "
+  #     end
+  #   end
+  #   movie.update(director: director.chomp(", "))
+  # end
 
   def self.get_movie_query_title(docs, movie_title_json)
     movie_query_title = nil
@@ -191,11 +212,17 @@ class Movie < ApplicationRecord
 
   def self.get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_query_title, movie_title_json, year)
     query_string = change_umlaut_to_vowel(movie_query_title)
-    if create_url_tmdb_id(query_string).nil?
+    tmdb_url = TmdbUtility.create_url(query_string)
+    if tmdb_url.nil?
       query_string = change_umlaut_to_vowel(movie_title_json)
+      tmdb_url = TmdbUtility.create_url(query_string)
     end
-    tmdb_query_url = create_url_tmdb_id(query_string)
-    return get_tmdb_id(tmdb_query_url, year, query_string, movie_title_json)
+
+    # if create_url_tmdb_id(query_string).nil?
+    #   query_string = change_umlaut_to_vowel(movie_title_json)
+    # end
+    # tmdb_query_url = create_url_tmdb_id(query_string)
+    return TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
   end
 
   def self.get_additional_info_from_tmdb(tmdb_id, kind_of_info)

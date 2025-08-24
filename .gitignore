@@ -34,3 +34,5 @@
 /config/master.key
 /config/tmdb_token
 /config/postgres_password
+
+.idea/
