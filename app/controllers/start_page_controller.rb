@@ -18,17 +18,17 @@ class StartPageController < ApplicationController
 
   def start_movie
     @movie_hash = Hash.new
-    @movie_hash.update DE_FRANCE      => @de_france
-    @movie_hash.update VOTIV_KINO     => @votiv
-    @movie_hash.update GARTENBAU_KINO => @gartenbau
     @movie_hash.update BURG_KINO      => @burg
+    @movie_hash.update GARTENBAU_KINO => @gartenbau
+    @movie_hash.update VOTIV_KINO     => @votiv
+    @movie_hash.update DE_FRANCE      => @de_france
   end
 
   def set_movies
-    @de_france =  Cinema.get_random_movie_for_start_page DE_FRANCE
-    @votiv     =  Cinema.get_random_movie_for_start_page VOTIV_KINO
-    @gartenbau =  Cinema.get_random_movie_for_start_page GARTENBAU_KINO
     @burg      =  Cinema.get_random_movie_for_start_page BURG_KINO
+    @gartenbau =  Cinema.get_random_movie_for_start_page GARTENBAU_KINO
+    @votiv     =  Cinema.get_random_movie_for_start_page VOTIV_KINO
+    @de_france =  Cinema.get_random_movie_for_start_page DE_FRANCE
   end
 
 end
