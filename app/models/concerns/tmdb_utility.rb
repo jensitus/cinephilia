@@ -35,8 +35,9 @@ module TmdbUtility
             presumable_tmdb_id = tmdb_result['id']
           end
         else
-          presumable_tmdb_id = the_other_way_around(tmdb_result["id"], movie_title_json, year)
-          return presumable_tmdb_id unless presumable_tmdb_id.nil?
+          puts false
+          # presumable_tmdb_id = the_other_way_around(tmdb_result["id"], movie_title_json, year)
+          # return presumable_tmdb_id unless presumable_tmdb_id.nil?
         end
       end
     end
@@ -72,7 +73,7 @@ module TmdbUtility
         tmdb_id = nil
       end
     elsif change_umlaut_to_vowel(movie_title).eql?(change_umlaut_to_vowel(tmdb_results["title"]))
-      if !tmdb_release_year == year
+      if tmdb_release_year != year
         tmdb_id = nil
       end
     end
