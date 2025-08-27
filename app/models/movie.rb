@@ -12,7 +12,6 @@ class Movie < ApplicationRecord
 
   VIENNA = "Wien"
   SEVEN_DAYS = 7
-  TOKEN = Rails.configuration.tmdb_token
 
   def self.set_date
     date = Date.today
@@ -73,10 +72,6 @@ class Movie < ApplicationRecord
     movie.movie_id = movie_string_id if movie.new_record?
     if movie.tmdb_id.nil?
       tmdb_id = update_movie_and_return_tmdb_id(movie, film_at_uri)
-    else
-      tmdb_id = movie.tmdb_id
-    end
-    if movie.new_record?
       TmdbUtility.fetch_movie_info_from_tmdb(movie, tmdb_id) unless tmdb_id.nil?
     end
     movie.save if movie.changed?
