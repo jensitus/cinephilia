@@ -131,8 +131,8 @@ class Movie < ApplicationRecord
     docs = get_additional_info(uri)
     if docs != nil
 
-      movie_query_title = get_movie_query_title(docs, movie.title)
-
+      movie_original_title = get_movie_query_title(docs, movie.title)
+      movie.update(original_title: movie_original_title) unless movie_original_title.nil?
       docs.css('article div p span.release').each do |link|
         additional_info = link.content.gsub(" ", "").split(",")
         year = additional_info[-1].gsub("\n", "")
@@ -140,7 +140,7 @@ class Movie < ApplicationRecord
         countries = additional_info.join(", ")
         country_string = countries.chomp(', ').gsub("\n", "")
         movie.update(countries: country_string, year: year)
-        tmdb_id = get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_query_title, movie.title, year)
+        tmdb_id = get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_original_title, movie.title, year)
         # if tmdb_id != nil
         #   description = get_additional_info_from_tmdb(tmdb_id.to_s, "overview")
         #   poster_path = get_additional_info_from_tmdb(tmdb_id.to_s, "poster_path")
