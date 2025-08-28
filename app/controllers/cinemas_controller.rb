@@ -24,9 +24,14 @@ class CinemasController < ApplicationController
   end
 
   def set_cinema_schedules
-    @cinema_schedules =
-      @cinema.schedules
-             .group_by { |schedule| Time.at(schedule.time).strftime("%d.%m.") }
-             .collect { |timeslot, schedule| [timeslot, Hash[schedule.group_by { |s| s.movie.title }]] }
+
+    schedules_by_date = @cinema.schedules.order(:time).group_by do |schedule|
+      schedule.time.strftime("%d.%m.")
+    end
+
+    @cinema_schedules = schedules_by_date.transform_values do |schedules|
+      schedules.group_by { |schedule| schedule.movie.title }.to_h
+    end
+
   end
 end
