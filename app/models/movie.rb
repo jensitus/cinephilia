@@ -11,7 +11,7 @@ class Movie < ApplicationRecord
   has_many :cinemas, through: :schedules
 
   VIENNA = "Wien"
-  SEVEN_DAYS = 3
+  SEVEN_DAYS = 7
 
   def self.set_date
     date = Date.today
