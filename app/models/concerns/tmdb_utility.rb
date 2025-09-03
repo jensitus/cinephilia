@@ -1,6 +1,6 @@
 module TmdbUtility
 
-  TOKEN = Rails.configuration.tmdb_token
+  TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5MzNjZGQ3MTcxYzUxMDZlNDQ5MjU3N2YzZjAwOGM1ZCIsIm5iZiI6MTM2NDc1NzgxNy4wLCJzdWIiOiI1MTU4OGQzOTE5YzI5NTY3NDQwZDlhYWUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.sNb6zKWkCKY600bpUOn2WKac1GUOJW6-E-0O0PIBfjc" # Rails.configuration.tmdb_token
   TMDB_BASE_URL = "https://api.themoviedb.org/3".freeze
   TMDB_SEARCH_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/search/movie".freeze
   TMDB_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/movie".freeze

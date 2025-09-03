@@ -13,6 +13,7 @@ class NokogiriService < BaseService
 
   def fetch_additional_info
     docs = nil
+    sleep 0.2
     begin
       docs = Nokogiri::HTML(URI.open("https://film.at" + @url))
     rescue OpenURI::HTTPError => error

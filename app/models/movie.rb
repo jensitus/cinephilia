@@ -10,19 +10,74 @@ class Movie < ApplicationRecord
   has_many :schedules
   has_many :cinemas, through: :schedules
 
+  BASE_MOVIE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/"
   VIENNA = "Wien"
-  SEVEN_DAYS = 7
+  DAYS_TO_FETCH = 7
 
   def self.set_date
-    date = Date.today
-    condition_date = Date.today.plus_with_duration(SEVEN_DAYS)
-    while date < condition_date do
-      url = URI.parse("https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/" + date.to_s)
-      date = date.plus_with_duration(1)
+    current_date = Date.today
+    end_date = Date.today + DAYS_TO_FETCH
+    fetch_movies_for_date_range(current_date, end_date)
+=begin
+    while current_date < end_date do
+      url = URI.parse("https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/" + current_date.to_s)
+      current_date = current_date.plus_with_duration(1)
       fetch_movie(url)
     end
-    delete_old_schedules(date)
+=end
+    delete_old_schedules(current_date)
     delete_movies_without_schedules
+  end
+
+  private
+
+  def self.fetch_movies_for_date_range(start_date, end_date)
+    start_date.upto(end_date - 1) do |date|
+      fetch_movies_for_date(date)
+    end
+  end
+
+  def self.fetch_movies_for_date(date)
+    url = URI.parse("#{BASE_MOVIE_URL}#{date}")
+    parsed_result = fetch_and_parse_movies(url)
+
+    parsed_result.each do |movie_data|
+      process_movie_data(movie_data)
+    end
+  end
+
+  def self.process_movie_data(movie_data)
+    return unless movie_belongs_to_vienna?(movie_data)
+
+    film_at_uri = movie_data["parent"]["uri"].gsub("/filmat", "")
+    movie_string_id = create_movie_id(movie_data["parent"]["title"]) # "m-#{movie_data["parent"]["title"].downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}"
+
+    movie = find_or_create_movie(movie_string_id, film_at_uri, movie_data["parent"]["title"])
+    associate_genres_with_movie(movie, movie_data["parent"]["genres"])
+    process_cinemas_and_schedules(movie_data, movie.id)
+  end
+
+  def self.associate_genres_with_movie(movie, genres)
+    return unless genres.present?
+
+    genres.each do |genre_name|
+      genre = find_or_create_genre(genre_name)
+      movie.genres << genre unless movie.genres.include?(genre)
+    end
+  end
+
+  def self.movie_belongs_to_vienna?(movie_data)
+    movie_data["nestedResults"].any? { |nested| nested["parent"]["county"] == VIENNA }
+  end
+
+  def self.fetch_and_parse_movies(url)
+
+    response = Net::HTTP.get(url)
+    JSON.parse(response)["result"]
+=begin
+    file = File.read("./public/2025-08-28.json")
+    JSON.parse(file)["result"]
+=end
   end
 
   def self.delete_old_schedules(date)
@@ -34,36 +89,33 @@ class Movie < ApplicationRecord
     Movie.left_outer_joins(:schedules).where(schedules: { id: nil }).find_each(&:destroy)
   end
 
-  def self.fetch_movie(url)
-
-=begin
-    file = File.read("./public/2025-08-28.json")
-    parsed_result = JSON.parse(file)["result"]
-=end
-
-    response = Net::HTTP.get(url)
-    parsed_result = JSON.parse(response)["result"]
-
-    parsed_result.each do |movie_data|
-
-      should_fetch_movie = movie_data["nestedResults"].any? do |nested_result|
-        nested_result["parent"]["county"] == VIENNA
-      end
-
-      next unless should_fetch_movie
-
-      film_at_uri = movie_data["parent"]["uri"].gsub("/filmat", "")
-      movie_string_id = "m-#{movie_data["parent"]["title"].downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}"
-      movie_created = find_or_create_movie(movie_string_id, film_at_uri, movie_data["parent"]["title"])
-      if movie_data["parent"]["genres"].present?
-        create_genres(movie_data["parent"]["genres"], movie_created)
-      end
-      get_cinema_and_schedule(movie_data, movie_created.id)
-
-    end
-  end
-
-  private
+#   def self.fetch_movie(url)
+#
+#     file = File.read("./public/2025-08-28.json")
+#     parsed_result = JSON.parse(file)["result"]
+#
+# =begin
+#     response = Net::HTTP.get(url)
+#     parsed_result = JSON.parse(response)["result"]
+# =end
+#     parsed_result.each do |movie_data|
+#
+#       should_fetch_movie = movie_data["nestedResults"].any? do |nested_result|
+#         nested_result["parent"]["county"] == VIENNA
+#       end
+#
+#       next unless should_fetch_movie
+#
+#       film_at_uri = movie_data["parent"]["uri"].gsub("/filmat", "")
+#       movie_string_id = "m-#{movie_data["parent"]["title"].downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}"
+#       movie_created = find_or_create_movie(movie_string_id, film_at_uri, movie_data["parent"]["title"])
+#       if movie_data["parent"]["genres"].present?
+#         find_or_create_genre(movie_data["parent"]["genres"], movie_created)
+#       end
+#       process_cinemas_and_schedules(movie_data, movie_created.id)
+#
+#     end
+#   end
 
   def self.find_or_create_movie(movie_string_id, film_at_uri, movie_title)
     movie = Movie.find_or_initialize_by(movie_id: movie_string_id)
@@ -77,34 +129,34 @@ class Movie < ApplicationRecord
     movie
   end
 
-  def self.get_cinema_and_schedule(movie_json, movie_id)
+  def self.process_cinemas_and_schedules(movie_json, movie_id)
     movie_json["nestedResults"].each do |nested_result|
-      if nested_result["parent"]["county"] == VIENNA
-        cinema = create_cinema(nested_result["parent"])
-        nested_result["screenings"].each do |screening|
-          schedule = create_schedule(screening, movie_id, cinema.id)
-          if screening["tags"] != nil
-            screening["tags"].each do |tag|
-              t = create_tag(tag)
-              if t != nil
-                if schedule != nil && !schedule.tags.include?(t)
-                  schedule.tags.push(t)
-                end
-              end
-            end
-          end
-        end
-      end
+      next unless nested_result["parent"]["county"] == VIENNA
+      cinema = find_or_create_cinema(nested_result["parent"])
+      create_schedules_with_tags(nested_result["screenings"], movie_id, cinema.id)
     end
   end
 
-  def self.create_genres(genres, movie_created)
-    genres.each do |genre_json|
-      genre = create_genre(genre_json)
-      unless movie_created.genres.include?(genre)
-        movie_created.genres.push(genre)
-      end
+  def self.create_schedules_with_tags(screenings, movie_id, cinema_id)
+    screenings.each do |screening|
+      schedule = create_schedule(screening, movie_id, cinema_id)
+      associate_tags_with_schedule(screening["tags"], schedule) if screening["tags"]
     end
+  end
+
+  def self.associate_tags_with_schedule(tags, schedule)
+    return unless schedule
+
+    tags.each do |tag_name|
+      tag = find_or_create_tag(tag_name)
+      schedule.tags << tag unless schedule.tags.include?(tag)
+    end
+  end
+
+  def self.find_or_create_genre(genre)
+    genre = Genre.find_or_initialize_by(name: genre)
+    genre.save if genre.new_record?
+    genre
   end
 
   def self.get_additional_info(uri, html_parse_string)
@@ -130,15 +182,15 @@ class Movie < ApplicationRecord
     tmdb_id
   end
 
-  def self.create_url_tmdb_id(movie_query_string)
-    begin
-      url = URI("https://api.themoviedb.org/3/search/movie?query=" + movie_query_string + "&language=de-DE&region=DE")
-      url
-    rescue URI::InvalidURIError
-      Rails.logger.error "invalid uri"
-      nil
-    end
-  end
+  # def self.create_url_tmdb_id(movie_query_string)
+  #   begin
+  #     url = URI("https://api.themoviedb.org/3/search/movie?query=" + movie_query_string + "&language=de-DE&region=DE")
+  #     url
+  #   rescue URI::InvalidURIError
+  #     Rails.logger.error "invalid uri"
+  #     nil
+  #   end
+  # end
 
   def self.get_movie_query_title(uri, movie_title_json)
     movie_query_title = get_additional_info(uri, "article div p span.ov-title")
@@ -158,40 +210,34 @@ class Movie < ApplicationRecord
     TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
   end
 
-  def self.get_additional_info_from_tmdb(tmdb_id, kind_of_info)
-    url = URI("https://api.themoviedb.org/3/movie/" + tmdb_id + "?language=de-DE&region=DE")
-    tmdb_results = get_tmdb_results(url)
-    additional_info = tmdb_results["#{kind_of_info}"]
-    additional_info
-  end
+  # def self.get_additional_info_from_tmdb(tmdb_id, kind_of_info)
+  #   url = URI("https://api.themoviedb.org/3/movie/" + tmdb_id + "?language=de-DE&region=DE")
+  #   tmdb_results = get_tmdb_results(url)
+  #   additional_info = tmdb_results["#{kind_of_info}"]
+  #   additional_info
+  # end
 
   def self.change_umlaut_to_vowel(querystring)
     q = I18n.transliterate(querystring).downcase.gsub("ä", "a").gsub("ö", "o").gsub("ü", "u").gsub("ß", "ss").gsub(" -", "").gsub(":", "").gsub("'", "")
     querystring = q
   end
 
-  def self.create_genre(genre_name)
-    genre_id = "g-" + genre_name.downcase.gsub(" ", "-")
-    if Genre.where(genre_id: genre_id).exists? == false
-      genre = Genre.create!(genre_id: genre_id,
-                            name: genre_name)
-    else
-      genre = Genre.find_by(genre_id: genre_id)
-    end
-    genre
-  end
+  # def self.create_genre(genre_name)
+  #   genre_id = "g-" + genre_name.downcase.gsub(" ", "-")
+  #   if Genre.where(genre_id: genre_id).exists? == false
+  #     genre = Genre.create!(genre_id: genre_id,
+  #                           name: genre_name)
+  #   else
+  #     genre = Genre.find_by(genre_id: genre_id)
+  #   end
+  #   genre
+  # end
 
-  def self.create_cinema(cinema)
+  def self.find_or_create_cinema(cinema)
     theater_id = "t-" + cinema["title"].gsub(" ", "-").downcase
-    if Cinema.where(cinema_id: theater_id).exists? == false
-      cinema_created = Cinema.create!(title: cinema["title"],
-                                      county: cinema["county"],
-                                      uri: get_cinema_url(cinema["uri"].gsub("/filmat", "")),
-                                      cinema_id: theater_id)
-    else
-      cinema_created = Cinema.find_by(cinema_id: theater_id)
-    end
-    cinema_created
+    cinema = Cinema.find_or_create_by(cinema_id: theater_id)
+    cinema.update(title: cinema["title"], county: cinema["county"], uri: get_cinema_url(cinema["uri"].gsub("/filmat", "")), cinema_id: theater_id) if cinema.new_record?
+    cinema
   end
 
   def self.get_cinema_url(uri)
@@ -220,13 +266,16 @@ class Movie < ApplicationRecord
     schedule_created
   end
 
-  def self.create_tag(tag)
-    if Tag.where(name: tag).exists? == false
-      tag_id = "t-" + tag.downcase.gsub(" ", "-").downcase
-      t = Tag.create!(name: tag, tag_id: tag_id)
-    else
-      t = Tag.find_by(name: tag)
-    end
-    t
+  def self.find_or_create_tag(tag)
+    tag_id = "t-" + tag.downcase.gsub(" ", "-").downcase
+    puts tag.inspect
+    tag = Tag.find_or_initialize_by(name: tag)
+    tag.save if tag.new_record?
+    tag
   end
+
+  def self.create_movie_id(title)
+    "m-#{title.downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}"
+  end
+
 end
