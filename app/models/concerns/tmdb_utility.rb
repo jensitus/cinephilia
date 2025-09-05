@@ -64,7 +64,7 @@ module TmdbUtility
 
   def self.check_tmdb_with_json_movie_title(movie_title_json, year)
     normalized = normalize_and_clean(movie_title_json)
-    url = URI("#{TMDB_SEARCH_MOVIE_ENDPOINT}?query=#{movie_title_json}&language=de-DE&region=DE")
+    url = URI("#{TMDB_SEARCH_MOVIE_ENDPOINT}?query=#{normalized}&language=de-DE&region=DE")
     tmdb_results = get_tmdb_results(url)
     check_tmdb_id_if_original_title_not_possible(tmdb_results, movie_title_json, year)
   end
