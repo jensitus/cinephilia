@@ -1,6 +1,6 @@
 module TmdbUtility
 
-  TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5MzNjZGQ3MTcxYzUxMDZlNDQ5MjU3N2YzZjAwOGM1ZCIsIm5iZiI6MTM2NDc1NzgxNy4wLCJzdWIiOiI1MTU4OGQzOTE5YzI5NTY3NDQwZDlhYWUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.sNb6zKWkCKY600bpUOn2WKac1GUOJW6-E-0O0PIBfjc" # Rails.configuration.tmdb_token
+  # TOKEN = Rails.configuration.tmdb_token
   TMDB_BASE_URL = "https://api.themoviedb.org/3".freeze
   TMDB_SEARCH_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/search/movie".freeze
   TMDB_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/movie".freeze
@@ -25,7 +25,6 @@ module TmdbUtility
 
   def self.fetch_tmdb_id(url, year, movie_query_title, movie_title_json)
     tmdb_results = get_tmdb_results(url)
-    return nil if tmdb_results.nil?
 
     presumable_tmdb_id = nil
 
@@ -35,10 +34,11 @@ module TmdbUtility
       elsif match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
         presumable_tmdb_id = tmdb_result["id"]
       end
-    end
+    end unless tmdb_results.nil?
 
     presumable_tmdb_id ||= attempt_single_result_resolution(tmdb_results, movie_title_json, year)
     presumable_tmdb_id ||= check_tmdb_id_if_original_title_not_possible(tmdb_results, movie_title_json, year)
+    presumable_tmdb_id ||= check_tmdb_with_json_movie_title(movie_title_json, year)
     presumable_tmdb_id
   end
 
@@ -59,6 +59,12 @@ module TmdbUtility
       end
     end
     nil
+  end
+
+  def self.check_tmdb_with_json_movie_title(movie_title_json, year)
+    url = URI("#{TMDB_SEARCH_MOVIE_ENDPOINT}?query=#{movie_title_json}&language=de-DE&region=DE")
+    tmdb_results = get_tmdb_results(url)
+    check_tmdb_id_if_original_title_not_possible(tmdb_results, movie_title_json, year)
   end
 
   def self.the_other_way_around(tmdb_id, movie_title, year)

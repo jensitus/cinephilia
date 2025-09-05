@@ -71,13 +71,13 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_and_parse_movies(url)
-
+=begin
     response = Net::HTTP.get(url)
     JSON.parse(response)["result"]
-=begin
+=end
     file = File.read("./public/2025-08-28.json")
     JSON.parse(file)["result"]
-=end
+
   end
 
   def self.delete_old_schedules(date)
@@ -89,44 +89,30 @@ class Movie < ApplicationRecord
     Movie.left_outer_joins(:schedules).where(schedules: { id: nil }).find_each(&:destroy)
   end
 
-#   def self.fetch_movie(url)
-#
-#     file = File.read("./public/2025-08-28.json")
-#     parsed_result = JSON.parse(file)["result"]
-#
-# =begin
-#     response = Net::HTTP.get(url)
-#     parsed_result = JSON.parse(response)["result"]
-# =end
-#     parsed_result.each do |movie_data|
-#
-#       should_fetch_movie = movie_data["nestedResults"].any? do |nested_result|
-#         nested_result["parent"]["county"] == VIENNA
-#       end
-#
-#       next unless should_fetch_movie
-#
-#       film_at_uri = movie_data["parent"]["uri"].gsub("/filmat", "")
-#       movie_string_id = "m-#{movie_data["parent"]["title"].downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}"
-#       movie_created = find_or_create_movie(movie_string_id, film_at_uri, movie_data["parent"]["title"])
-#       if movie_data["parent"]["genres"].present?
-#         find_or_create_genre(movie_data["parent"]["genres"], movie_created)
-#       end
-#       process_cinemas_and_schedules(movie_data, movie_created.id)
-#
-#     end
-#   end
-
   def self.find_or_create_movie(movie_string_id, film_at_uri, movie_title)
     movie = Movie.find_or_initialize_by(movie_id: movie_string_id)
     movie.title = movie_title if movie.new_record?
     movie.movie_id = movie_string_id if movie.new_record?
+
     if movie.tmdb_id.nil?
-      tmdb_id = update_movie_and_return_tmdb_id(movie, film_at_uri)
+      movie.original_title = get_movie_query_title(film_at_uri, movie.title)
+      update_movie_with_additional_info(film_at_uri, movie)
+      tmdb_id = fetch_tmdb_id(movie.original_title, movie.title, movie.year)
       TmdbUtility.fetch_movie_info_from_tmdb(movie, tmdb_id) unless tmdb_id.nil?
     end
     movie.save if movie.changed?
     movie
+  end
+
+  def self.update_movie_with_additional_info(uri, movie)
+    additional_info = get_additional_info(uri, "article div p span.release")
+    add_info_squish = additional_info.squish
+    additional_info_array = add_info_squish.split(",")
+    year = additional_info_array.last.strip
+    additional_info_array.delete_at(-1)
+    countries = additional_info_array.join(", ")
+    country_string = countries.chomp(", ").gsub("\n", "")
+    movie.update(countries: country_string, year: year)
   end
 
   def self.process_cinemas_and_schedules(movie_json, movie_id)
@@ -163,34 +149,24 @@ class Movie < ApplicationRecord
     NokogiriService.call(uri, html_parse_string)
   end
 
-  def self.update_movie_and_return_tmdb_id(movie, uri)
+  def self.fetch_tmdb_id(movie_original_title, movie_title, year)
     tmdb_id = nil
 
-    movie_original_title = get_movie_query_title(uri, movie.title)
-    movie.update(original_title: movie_original_title) unless movie_original_title.nil?
+    # movie_original_title = get_movie_query_title(uri, movie.title)
+    # movie.update(original_title: movie_original_title) unless movie_original_title.nil?
 
-    additional_info = get_additional_info(uri, "article div p span.release")
-    add_info_squish = additional_info.squish
-    additional_info_array = add_info_squish.split(",")
-    year = additional_info_array.last.strip
-    additional_info_array.delete_at(-1)
-
-    countries = additional_info_array.join(", ")
-    country_string = countries.chomp(", ").gsub("\n", "")
-    movie.update(countries: country_string, year: year)
-    tmdb_id = get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_original_title, movie.title, year)
+    # additional_info = get_additional_info(uri, "article div p span.release")
+    # add_info_squish = additional_info.squish
+    # additional_info_array = add_info_squish.split(",")
+    # year = additional_info_array.last.strip
+    # additional_info_array.delete_at(-1)
+    #
+    # countries = additional_info_array.join(", ")
+    # country_string = countries.chomp(", ").gsub("\n", "")
+    # movie.update(countries: country_string, year: year)
+    tmdb_id = get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_original_title, movie_title, year)
     tmdb_id
   end
-
-  # def self.create_url_tmdb_id(movie_query_string)
-  #   begin
-  #     url = URI("https://api.themoviedb.org/3/search/movie?query=" + movie_query_string + "&language=de-DE&region=DE")
-  #     url
-  #   rescue URI::InvalidURIError
-  #     Rails.logger.error "invalid uri"
-  #     nil
-  #   end
-  # end
 
   def self.get_movie_query_title(uri, movie_title_json)
     movie_query_title = get_additional_info(uri, "article div p span.ov-title")
@@ -210,28 +186,10 @@ class Movie < ApplicationRecord
     TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
   end
 
-  # def self.get_additional_info_from_tmdb(tmdb_id, kind_of_info)
-  #   url = URI("https://api.themoviedb.org/3/movie/" + tmdb_id + "?language=de-DE&region=DE")
-  #   tmdb_results = get_tmdb_results(url)
-  #   additional_info = tmdb_results["#{kind_of_info}"]
-  #   additional_info
-  # end
-
   def self.change_umlaut_to_vowel(querystring)
     q = I18n.transliterate(querystring).downcase.gsub("ä", "a").gsub("ö", "o").gsub("ü", "u").gsub("ß", "ss").gsub(" -", "").gsub(":", "").gsub("'", "")
     querystring = q
   end
-
-  # def self.create_genre(genre_name)
-  #   genre_id = "g-" + genre_name.downcase.gsub(" ", "-")
-  #   if Genre.where(genre_id: genre_id).exists? == false
-  #     genre = Genre.create!(genre_id: genre_id,
-  #                           name: genre_name)
-  #   else
-  #     genre = Genre.find_by(genre_id: genre_id)
-  #   end
-  #   genre
-  # end
 
   def self.find_or_create_cinema(cinema)
     theater_id = "t-" + cinema["title"].gsub(" ", "-").downcase
