@@ -17,7 +17,8 @@ module TmdbUtility
   end
 
   def self.change_umlaut_to_vowel(querystring)
-    I18n.transliterate(querystring).downcase.gsub("ä", "a").gsub("ö", "o").gsub("ü", "u").gsub("ß", "ss").gsub(" -", "").gsub(":", "").gsub("'", "")
+    querystring = querystring.downcase.gsub("ä", "a").gsub("ö", "o").gsub("ü", "u").gsub("ß", "ss").gsub(" -", "").gsub(":", "").gsub("'", "")
+    I18n.transliterate(querystring)
   end
 
   # # # # # # # # #
