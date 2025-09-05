@@ -18,13 +18,6 @@ class Movie < ApplicationRecord
     current_date = Date.today
     end_date = Date.today + DAYS_TO_FETCH
     fetch_movies_for_date_range(current_date, end_date)
-=begin
-    while current_date < end_date do
-      url = URI.parse("https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/" + current_date.to_s)
-      current_date = current_date.plus_with_duration(1)
-      fetch_movie(url)
-    end
-=end
     delete_old_schedules(current_date)
     delete_movies_without_schedules
   end
@@ -71,13 +64,13 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_and_parse_movies(url)
-=begin
+
     response = Net::HTTP.get(url)
     JSON.parse(response)["result"]
-=end
+=begin
     file = File.read("./public/2025-08-28.json")
     JSON.parse(file)["result"]
-
+=end
   end
 
   def self.delete_old_schedules(date)
