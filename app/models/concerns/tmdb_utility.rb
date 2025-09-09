@@ -1,13 +1,13 @@
 module TmdbUtility
 
-  # TOKEN = Rails.configuration.tmdb_token
   TMDB_BASE_URL = "https://api.themoviedb.org/3".freeze
   TMDB_SEARCH_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/search/movie".freeze
   TMDB_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/movie".freeze
+  LANGUAGE_REGION = "language=de-DE&region=DE"
 
   def self.create_movie_search_url(query, movie_title_json)
     query_param = build_query_string(query, movie_title_json)
-    generate_uri("#{TMDB_SEARCH_MOVIE_ENDPOINT}?query=#{query_param}&language=de-DE&region=DE")
+    UriService.call("#{TMDB_SEARCH_MOVIE_ENDPOINT}?query=#{query_param}&#{LANGUAGE_REGION}")
   end
 
   def self.fetch_release_year(tmdb_result)
@@ -16,67 +16,83 @@ module TmdbUtility
     release_date&.strftime("%Y")
   end
 
-  def self.change_umlaut_to_vowel(querystring)
-    querystring = querystring.downcase.gsub("ä", "a").gsub("ö", "o").gsub("ü", "u").gsub("ß", "ss").gsub(" -", "").gsub(":", "").gsub("'", "")
-    I18n.transliterate(querystring)
+  def self.fetch_movie_info_from_tmdb(movie, tmdb_id)
+    if tmdb_id != nil
+      description = get_additional_info_from_tmdb(tmdb_id.to_s, "overview")
+      poster_path = get_additional_info_from_tmdb(tmdb_id.to_s, "poster_path")
+      credits = fetch_credits(tmdb_id.to_s)
+    end
+    assign_movie_attributes(movie, tmdb_id, description, poster_path, credits)
   end
-
-  # # # # # # # # #
-  # suggestion from AI:
 
   def self.fetch_tmdb_id(url, year, movie_query_title, movie_title_json)
     tmdb_results = get_tmdb_results(url)
-
-    presumable_tmdb_id = nil
+    return unless tmdb_results
 
     tmdb_results["results"].each do |tmdb_result|
-      if match_original_title?(tmdb_result, movie_query_title, year, movie_title_json)
-        presumable_tmdb_id = tmdb_result["id"]
-      elsif match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
-        presumable_tmdb_id = tmdb_result["id"]
-      end
-    end unless tmdb_results.nil?
+      presumable_tmdb_id = process_tmdb_result(tmdb_result, movie_query_title, movie_title_json, year)
+      return presumable_tmdb_id if presumable_tmdb_id
+    end
 
-    presumable_tmdb_id ||= attempt_single_result_resolution(tmdb_results, movie_title_json, year)
-    presumable_tmdb_id ||= check_tmdb_id_if_original_title_not_possible(tmdb_results, movie_title_json, year)
-    presumable_tmdb_id ||= check_tmdb_with_json_movie_title(movie_title_json, year)
-    presumable_tmdb_id
+    resolve_tmdb_id_fallbacks(tmdb_results, movie_title_json, year)
   end
 
-  # end suggestion from AI
-  # # # # # # #
+  private
+
+  def self.process_tmdb_result(tmdb_result, movie_query_title, movie_title_json, year)
+
+    if match_original_title?(tmdb_result, movie_query_title, movie_title_json) ||
+      match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
+
+      presumable_tmdb_id = tmdb_result["id"]
+      tmdb_single_result = fetch_tmdb_single_result_by_tmdb_id(presumable_tmdb_id)
+      return presumable_tmdb_id if release_year_valid?(tmdb_single_result, year)
+    end
+
+    nil
+  end
+
+  def self.resolve_tmdb_id_fallbacks(tmdb_results, movie_title_json, year)
+    attempt_single_result_resolution(tmdb_results, movie_title_json, year) ||
+      check_tmdb_id_if_original_title_not_possible(tmdb_results, movie_title_json, year) ||
+      check_tmdb_with_json_movie_title(movie_title_json, year)
+  end
+
+  def self.fetch_tmdb_single_result_by_tmdb_id(tmdb_id)
+    uri = UriService.call("#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}?#{LANGUAGE_REGION}")
+    TmdbResultService.call(uri)
+  end
 
   def self.check_tmdb_id_if_original_title_not_possible(tmdb_results, movie_title_json, year)
     tmdb_results["results"].each do |tmdb_result_loop|
-      url = URI("https://api.themoviedb.org/3/movie/#{tmdb_result_loop['id']}?language=de-DE&region=DE")
-      tmdb_single_result = get_tmdb_results(url)
-      tmdb_single_result_title = normalized_title(tmdb_single_result["title"])
-      normalized_movie_title_json = normalized_title(movie_title_json)
-      if tmdb_single_result_title.eql?(normalized_movie_title_json)
-        tmdb_single_result_release_year = fetch_release_year(tmdb_single_result)
-        if tmdb_single_result_release_year == year
-          return tmdb_result_loop["id"]
-        end
+      tmdb_id = tmdb_result_loop["id"]
+      tmdb_single_result = fetch_tmdb_movie_details(tmdb_id)
+
+      next unless titles_match?(tmdb_single_result["title"], movie_title_json)
+
+      if release_year_valid?(tmdb_single_result, year)
+        return tmdb_id
+      else
+        return nil
       end
     end
     nil
   end
 
   def self.check_tmdb_with_json_movie_title(movie_title_json, year)
-    normalized = normalize_and_clean(movie_title_json)
+    normalized = NormalizeAndCleanService.call(movie_title_json)
     url = URI("#{TMDB_SEARCH_MOVIE_ENDPOINT}?query=#{normalized}&language=de-DE&region=DE")
     tmdb_results = get_tmdb_results(url)
     check_tmdb_id_if_original_title_not_possible(tmdb_results, movie_title_json, year)
   end
 
   def self.the_other_way_around(tmdb_id, movie_title, year)
-    url = URI("https://api.themoviedb.org/3/movie/#{tmdb_id}?language=de-DE&region=DE")
-    tmdb_results = get_tmdb_results(url)
-    tmdb_release_year = fetch_release_year(tmdb_results)
+    tmdb_single_result = fetch_tmdb_single_result_by_tmdb_id(tmdb_id)
+    tmdb_release_year = fetch_release_year(tmdb_single_result)
 
-    movie_title_normalized = change_umlaut_to_vowel(movie_title)
-    tmdb_title_normalized = change_umlaut_to_vowel(tmdb_results["title"])
-    tmdb_original_title_normalized = change_umlaut_to_vowel(tmdb_results["original_title"])
+    movie_title_normalized = NormalizeAndCleanService.call(movie_title)
+    tmdb_title_normalized = NormalizeAndCleanService.call(tmdb_single_result["title"])
+    tmdb_original_title_normalized = NormalizeAndCleanService.call(tmdb_single_result["original_title"])
 
     if movie_title_normalized != tmdb_title_normalized
       # Check if original title matches and the years are the same
@@ -90,23 +106,15 @@ module TmdbUtility
     tmdb_id
   end
 
-  def self.fetch_movie_info_from_tmdb(movie, tmdb_id)
-    if tmdb_id != nil
-      description = get_additional_info_from_tmdb(tmdb_id.to_s, "overview")
-      poster_path = get_additional_info_from_tmdb(tmdb_id.to_s, "poster_path")
-      credits = fetch_credits(tmdb_id.to_s)
-    end
-    assign_movie_attributes(movie, tmdb_id, description, poster_path, credits)
-  end
-
   def self.fetch_credits(tmdb_id)
-    url = generate_uri("#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}/credits")
+    url = UriService.call("#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}/credits")
     get_tmdb_results(url)
   end
 
   def self.get_additional_info_from_tmdb(tmdb_id, kind_of_info)
-    url = URI("https://api.themoviedb.org/3/movie/" + tmdb_id + "?language=de-DE&region=DE")
-    tmdb_results = get_tmdb_results(url)
+    uri = UriService.call("#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}?#{LANGUAGE_REGION}")
+    return nil if uri.nil?
+    tmdb_results = get_tmdb_results(uri)
     additional_info = tmdb_results["#{kind_of_info}"]
     additional_info
   end
@@ -115,11 +123,23 @@ module TmdbUtility
     TmdbResultService.call(url)
   end
 
-  private
+  def self.release_year_valid?(tmdb_result, year)
+    release_year = fetch_release_year(tmdb_result)&.to_i
+    (year.to_i - 1..year.to_i + 1).include?(release_year)
+  end
 
-  def self.match_original_title?(tmdb_result, movie_query_title, year, movie_title_json)
-    tmdb_title_to_compare = nil
-    json_title_to_compare = nil
+  def self.fetch_tmdb_movie_details(tmdb_id)
+    url = "#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}?language=de-DE&region=DE"
+    uri = UriService.call(url)
+    get_tmdb_results(uri)
+  end
+
+  def self.titles_match?(tmdb_result_title, movie_title_json)
+    return false if tmdb_result_title.nil? || movie_title_json.nil?
+    normalized_title(tmdb_result_title).eql?(normalized_title(movie_title_json))
+  end
+
+  def self.match_original_title?(tmdb_result, movie_query_title, movie_title_json)
     if movie_query_title.match?(/\A\?*\z/)
       tmdb_title_to_compare = normalized_title(tmdb_result["title"])
       json_title_to_compare = normalized_title movie_title_json
@@ -127,9 +147,7 @@ module TmdbUtility
       tmdb_title_to_compare = normalized_title(tmdb_result["original_title"])
       json_title_to_compare = normalized_title movie_query_title
     end
-    tmdb_release_year = fetch_release_year(tmdb_result)
-
-    (tmdb_title_to_compare.eql?(json_title_to_compare) && [year.to_i, year.to_i + 1, year.to_i - 1].include?(tmdb_release_year.to_i))
+    tmdb_title_to_compare.eql? json_title_to_compare
   end
 
   def self.match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
@@ -142,41 +160,19 @@ module TmdbUtility
   end
 
   def self.normalized_title(title)
-    change_umlaut_to_vowel(title.downcase)
+    NormalizeAndCleanService.call(title.downcase)
   end
 
   def self.attempt_single_result_resolution(tmdb_results, movie_title_json, year)
+    return nil if tmdb_results.nil?
     return nil unless tmdb_results["results"].length == 1
 
     single_result = tmdb_results["results"].first
     the_other_way_around(single_result["id"], movie_title_json, year)
   end
 
-  def self.generate_uri(url)
-    URI(url)
-  rescue URI::InvalidURIError
-    Rails.logger.error "Invalid URI: #{url.inspect}"
-    nil
-  end
-
-  def self.normalize_and_clean(query_string)
-    normalized_string = I18n.transliterate(query_string).downcase
-    normalized_string.gsub("ä", "a")
-                     .gsub("ö", "o")
-                     .gsub("ü", "u")
-                     .gsub("ß", "ss")
-                     .gsub(" -", "")
-                     .gsub(":", "")
-                     .gsub("'", "")
-  end
-
-  def self.fetch_movie_credits(tmdb_id)
-    url = generate_uri("#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}/credits")
-    get_tmdb_results(url)
-  end
-
   def self.build_query_string(query, fallback_title)
-    query.match?(/\A\?*\z/) ? normalize_and_clean(fallback_title) : query
+    query.match?(/\A\?*\z/) || query.match?(/\A.{4} .\z/) ? NormalizeAndCleanService.call(fallback_title) : query
   end
 
   def self.assign_movie_attributes(movie, tmdb_id, description, poster_path, credits)
@@ -197,7 +193,7 @@ module TmdbUtility
   end
 
   def self.extract_directors_from_credits(crew_members)
-    crew_members.select { |member| member["known_for_department"] == "Directing" && member["job"] == "Director" }
+    crew_members.select { |member| member["known_for_department"] == "Directing" && member["job"] == "Director" || member["department"] == "Directing" && member["job"] == "Director" }
                 .map { |director| director["name"] }
                 .join(", ")
   end

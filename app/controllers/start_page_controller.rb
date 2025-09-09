@@ -1,6 +1,6 @@
 class StartPageController < ApplicationController
   before_action :set_movies
-  before_action :start_movie
+  before_action :cinemas_for_homepage
 
   VOTIV_KINO = "Votiv Kino"
   DE_FRANCE = "De France"
@@ -13,10 +13,7 @@ class StartPageController < ApplicationController
 
   private
 
-  def de_france
-  end
-
-  def start_movie
+  def cinemas_for_homepage
     @movie_hash = Hash.new
     @movie_hash.update BURG_KINO      => @burg
     @movie_hash.update GARTENBAU_KINO => @gartenbau

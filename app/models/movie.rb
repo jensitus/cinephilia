@@ -64,13 +64,13 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_and_parse_movies(url)
-
+=begin
     response = Net::HTTP.get(url)
     JSON.parse(response)["result"]
-=begin
+=end
     file = File.read("./public/2025-08-28.json")
     JSON.parse(file)["result"]
-=end
+
   end
 
   def self.delete_old_schedules(date)
@@ -143,20 +143,6 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_tmdb_id(movie_original_title, movie_title, year)
-    tmdb_id = nil
-
-    # movie_original_title = get_movie_query_title(uri, movie.title)
-    # movie.update(original_title: movie_original_title) unless movie_original_title.nil?
-
-    # additional_info = get_additional_info(uri, "article div p span.release")
-    # add_info_squish = additional_info.squish
-    # additional_info_array = add_info_squish.split(",")
-    # year = additional_info_array.last.strip
-    # additional_info_array.delete_at(-1)
-    #
-    # countries = additional_info_array.join(", ")
-    # country_string = countries.chomp(", ").gsub("\n", "")
-    # movie.update(countries: country_string, year: year)
     tmdb_id = get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_original_title, movie_title, year)
     tmdb_id
   end
@@ -170,19 +156,13 @@ class Movie < ApplicationRecord
   end
 
   def self.get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_query_title, movie_title_json, year)
-    query_string = change_umlaut_to_vowel(movie_query_title)
+    query_string = NormalizeAndCleanService.call(movie_query_title)
     tmdb_url = TmdbUtility.create_movie_search_url(query_string, movie_title_json)
     if tmdb_url.nil?
-      query_string = change_umlaut_to_vowel(movie_title_json)
+      query_string = NormalizeAndCleanService.call(movie_title_json)
       tmdb_url = TmdbUtility.create_movie_search_url(query_string, movie_title_json)
     end
     TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
-  end
-
-  def self.change_umlaut_to_vowel(querystring)
-    querystring = querystring.downcase.gsub("ä", "a").gsub("ö", "o").gsub("ü", "u").gsub("ß", "ss").gsub(" -", "").gsub(":", "").gsub("'", "")
-    q = I18n.transliterate(querystring).downcase.gsub("ä", "a").gsub("ö", "o").gsub("ü", "u").gsub("ß", "ss").gsub(" -", "").gsub(":", "").gsub("'", "")
-    querystring = q
   end
 
   def self.find_or_create_cinema(cinema)
