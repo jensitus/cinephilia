@@ -1,4 +1,5 @@
 class NormalizeAndCleanService < BaseService
+
   attr_reader :to_be_normalized
 
   def initialize(to_be_normalized)

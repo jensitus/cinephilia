@@ -99,6 +99,7 @@ class Movie < ApplicationRecord
 
   def self.update_movie_with_additional_info(uri, movie)
     additional_info = get_additional_info(uri, "article div p span.release")
+    return if additional_info.nil?
     add_info_squish = additional_info.squish
     additional_info_array = add_info_squish.split(",")
     year = additional_info_array.last.strip
