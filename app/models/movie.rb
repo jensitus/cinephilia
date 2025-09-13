@@ -12,7 +12,7 @@ class Movie < ApplicationRecord
 
   BASE_MOVIE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/"
   VIENNA = "Wien"
-  DAYS_TO_FETCH = 1
+  DAYS_TO_FETCH = 7
 
   def self.set_date
     current_date = Date.today
@@ -64,13 +64,13 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_and_parse_movies(url)
-=begin
+
     response = Net::HTTP.get(url)
     JSON.parse(response)["result"]
-=end
+=begin
     file = File.read("./public/2025-08-28.json")
     JSON.parse(file)["result"]
-
+=end
   end
 
   def self.delete_old_schedules(date)
