@@ -12,7 +12,7 @@ class Movie < ApplicationRecord
 
   BASE_MOVIE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/"
   VIENNA = "Wien"
-  DAYS_TO_FETCH = 7
+  DAYS_TO_FETCH = 1
 
   def self.set_date
     current_date = Date.today
@@ -64,13 +64,13 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_and_parse_movies(url)
-
+=begin
     response = Net::HTTP.get(url)
     JSON.parse(response)["result"]
-=begin
+=end
     file = File.read("./public/2025-08-28.json")
     JSON.parse(file)["result"]
-=end
+
   end
 
   def self.delete_old_schedules(date)
@@ -119,7 +119,7 @@ class Movie < ApplicationRecord
 
   def self.create_schedules_with_tags(screenings, movie_id, cinema_id)
     screenings.each do |screening|
-      schedule = create_schedule(screening, movie_id, cinema_id)
+      schedule = Schedule.create_schedule(screening, movie_id, cinema_id)
       associate_tags_with_schedule(screening["tags"], schedule) if screening["tags"]
     end
   end
@@ -182,22 +182,22 @@ class Movie < ApplicationRecord
     cinema_url
   end
 
-  def self.create_schedule(screening, movie_id, cinema_id)
-    schedule_id = "s-" + movie_id.to_s + "-" + cinema_id.to_s + "-" + screening["time"]
-    begin
-      schedule_created = Schedule.create!(time: screening["time"],
-                                          three_d: screening["3d"],
-                                          ov: screening["ov"],
-                                          info: screening["info"],
-                                          movie_id: movie_id,
-                                          cinema_id: cinema_id,
-                                          schedule_id: schedule_id)
-    rescue Exception => ex
-      Rails.logger.error "ERROR " + ex.to_s
-      schedule_created = Schedule.find_by(schedule_id: schedule_id)
-    end
-    schedule_created
-  end
+  # def self.create_schedule(screening, movie_id, cinema_id)
+  #   schedule_id = "s-" + movie_id.to_s + "-" + cinema_id.to_s + "-" + screening["time"]
+  #   begin
+  #     schedule_created = Schedule.create!(time: screening["time"],
+  #                                         three_d: screening["3d"],
+  #                                         ov: screening["ov"],
+  #                                         info: screening["info"],
+  #                                         movie_id: movie_id,
+  #                                         cinema_id: cinema_id,
+  #                                         schedule_id: schedule_id)
+  #   rescue Exception => ex
+  #     Rails.logger.error "ERROR " + ex.to_s
+  #     schedule_created = Schedule.find_by(schedule_id: schedule_id)
+  #   end
+  #   schedule_created
+  # end
 
   def self.find_or_create_tag(tag)
     tag_id = "t-" + tag.downcase.gsub(" ", "-").downcase

@@ -14,13 +14,14 @@ class NormalizeAndCleanService < BaseService
 
   def normalize_and_clean
     normalized_string = I18n.transliterate(@to_be_normalized).downcase
-    normalized_string.gsub("ä", "a")
-                     .gsub("ö", "o")
-                     .gsub("ü", "u")
-                     .gsub("ß", "ss")
-                     .gsub(" -", "")
-                     .gsub(":", "")
-                     .gsub("'", "")
+    return_value = normalized_string.gsub("ä", "a")
+                                    .gsub("ö", "o")
+                                    .gsub("ü", "u")
+                                    .gsub("ß", "ss")
+                                    .gsub(" -", "")
+                                    .gsub(":", "")
+                                    .gsub("'", "")
+                                    .gsub(".", "")
   end
 
 end
