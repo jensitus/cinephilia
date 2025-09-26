@@ -13,7 +13,7 @@ module TmdbUtility
   def self.fetch_release_year(tmdb_result)
     return unless tmdb_result["release_date"]
     release_date = tmdb_result["release_date"].to_date rescue nil
-    release_date&.strftime("%Y")
+    release_date&.strftime("%Y")&.to_i
   end
 
   def self.fetch_movie_info_from_tmdb(movie, tmdb_id)
@@ -34,10 +34,23 @@ module TmdbUtility
       return presumable_tmdb_id if presumable_tmdb_id
     end
 
-    resolve_tmdb_id_fallbacks(tmdb_results, movie_title_json, year)
+    tmdb_id = resolve_tmdb_id_fallbacks(tmdb_results, movie_title_json, year)
+    return tmdb_id unless tmdb_id.nil?
+    cleaned_up_url(movie_query_title, movie_title_json, year)
   end
 
   private
+
+  def self.cleaned_up_url(movie_query_title, movie_title_json, year)
+    cleaned_up_query_string = movie_query_title.gsub(/\s*\(.*?\)/, "")
+    uri = create_movie_search_url(cleaned_up_query_string, movie_title_json)
+    tmdb_results = get_tmdb_results(uri)
+    tmdb_results["results"].each do |tmdb_result|
+      tmdb_id = process_tmdb_result(tmdb_result, cleaned_up_query_string, movie_title_json, year)
+      return tmdb_id if tmdb_id
+    end
+    nil
+  end
 
   def self.process_tmdb_result(tmdb_result, movie_query_title, movie_title_json, year)
 
@@ -46,7 +59,8 @@ module TmdbUtility
 
       presumable_tmdb_id = tmdb_result["id"]
       tmdb_single_result = fetch_tmdb_single_result_by_tmdb_id(presumable_tmdb_id)
-      return presumable_tmdb_id if release_year_valid?(tmdb_single_result, year)
+      tmdb_release_year = fetch_release_year(tmdb_single_result)
+      return presumable_tmdb_id if release_year_valid?(tmdb_release_year, year)
     end
 
     nil
@@ -90,18 +104,23 @@ module TmdbUtility
     tmdb_single_result = fetch_tmdb_single_result_by_tmdb_id(tmdb_id)
     tmdb_release_year = fetch_release_year(tmdb_single_result)
 
-    movie_title_normalized = NormalizeAndCleanService.call(movie_title)
-    tmdb_title_normalized = NormalizeAndCleanService.call(tmdb_single_result["title"])
-    tmdb_original_title_normalized = NormalizeAndCleanService.call(tmdb_single_result["original_title"])
+    movie_title_normalized = normalize_title(movie_title)
+    tmdb_title_normalized = normalize_title(tmdb_single_result["title"])
+    tmdb_original_title_normalized = normalize_title(tmdb_single_result["original_title"])
 
-    if movie_title_normalized != tmdb_title_normalized
-      # Check if original title matches and the years are the same
-      return tmdb_id if tmdb_original_title_normalized == movie_title_normalized && year == tmdb_release_year
-      return nil
-    end
+    return tmdb_id if titles_match?(movie_title_normalized, tmdb_original_title_normalized) && year == "0"
+
+    return tmdb_id if titles_match?(movie_title_normalized, tmdb_original_title_normalized) && release_year_valid?(tmdb_release_year, year)
+    return nil if titles_match?(movie_title_normalized, tmdb_title_normalized) && !release_year_valid?(tmdb_release_year, year)
+
+    # if movie_title_normalized != tmdb_title_normalized
+    #   # Check if original title matches and the years are the same
+    #   return tmdb_id if tmdb_original_title_normalized == movie_title_normalized && year == tmdb_release_year
+    #   return nil
+    # end
 
     # Check if the release year matches for exact title match
-    return nil if tmdb_title_normalized == movie_title_normalized && tmdb_release_year != year
+    # return nil if tmdb_title_normalized == movie_title_normalized && tmdb_release_year != year
 
     tmdb_id
   end
@@ -123,9 +142,9 @@ module TmdbUtility
     TmdbResultService.call(url)
   end
 
-  def self.release_year_valid?(tmdb_result, year)
-    release_year = fetch_release_year(tmdb_result)&.to_i
-    (year.to_i - 1..year.to_i + 1).include?(release_year)
+  def self.release_year_valid?(tmdb_release_year, year)
+    # release_year = fetch_release_year(tmdb_result)&.to_i
+    (year.to_i - 1..year.to_i + 1).include?(tmdb_release_year)
   end
 
   def self.fetch_tmdb_movie_details(tmdb_id)
@@ -134,32 +153,29 @@ module TmdbUtility
     get_tmdb_results(uri)
   end
 
-  def self.titles_match?(tmdb_result_title, movie_title_json)
-    return false if tmdb_result_title.nil? || movie_title_json.nil?
-    normalized_title(tmdb_result_title).eql?(normalized_title(movie_title_json))
+  def self.titles_match?(title_one, title_two)
+    return false if title_one.nil? || title_two.nil?
+    normalize_title(title_one).eql?(normalize_title(title_two))
   end
 
   def self.match_original_title?(tmdb_result, movie_query_title, movie_title_json)
     if movie_query_title.match?(/\A\?*\z/)
-      tmdb_title_to_compare = normalized_title(tmdb_result["title"])
-      json_title_to_compare = normalized_title movie_title_json
+      titles_match?(tmdb_result["title"], movie_title_json)
     else
-      tmdb_title_to_compare = normalized_title(tmdb_result["original_title"])
-      json_title_to_compare = normalized_title movie_query_title
+      titles_match?(tmdb_result["original_title"], movie_query_title)
     end
-    tmdb_title_to_compare.eql? json_title_to_compare
   end
 
   def self.match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
-    tmdb_title = normalized_title(tmdb_result["title"])
+    tmdb_title = normalize_title(tmdb_result["title"])
     tmdb_release_year = fetch_release_year(tmdb_result)
-    normalized_json_title = normalized_title(movie_title_json)
+    normalized_json_title = normalize_title(movie_title_json)
 
     (tmdb_title == movie_query_title && tmdb_release_year.to_i == year.to_i) ||
       (tmdb_title == normalized_json_title && tmdb_release_year.to_i == year.to_i)
   end
 
-  def self.normalized_title(title)
+  def self.normalize_title(title)
     NormalizeAndCleanService.call(title.downcase)
   end
 

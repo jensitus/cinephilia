@@ -1,7 +1,7 @@
 <div class="container">
   <div class="row">
     <div class="col-md-3 m-2">
-      <%= image_tag "/cinephilia_logo.png", width: 250 %>
+      <%= image_tag "/cinephilia_logo_red.png", width: 250 %>
     </div>
     <div class="col-md-8">
       <% @movie_hash.each do |key, value| %>
@@ -25,7 +25,6 @@
                 <%= truncate_and_link(v.description, length: 150, url: "/movies/" + v.id.to_s) %>
               </div>
             </div>
-
 
           <% end %>
         </div>

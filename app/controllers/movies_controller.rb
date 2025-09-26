@@ -32,11 +32,5 @@ class MoviesController < ApplicationController
       schedules.group_by { |schedule| schedule.cinema.title }.to_h
     end
 
-    # schedules = @movie.schedules.order(:time).group_by { |schedule| Time.at(schedule.time).strftime("%d.%m.") }
-    # @movie_schedules = Hash.new
-    # schedules.each do |schedule|
-    #   @movie_schedules[schedule[0]] = Hash[schedule[1].group_by { |s| s.cinema.title }]
-    # end
-
   end
 end

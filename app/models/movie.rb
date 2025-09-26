@@ -18,8 +18,9 @@ class Movie < ApplicationRecord
     current_date = Date.today
     end_date = Date.today + DAYS_TO_FETCH
     fetch_movies_for_date_range(current_date, end_date)
-    delete_old_schedules(current_date)
+    Schedule.delete_old_schedules(current_date)
     delete_movies_without_schedules
+    Schedule.delete_schedules_without_movies
   end
 
   private
@@ -47,14 +48,14 @@ class Movie < ApplicationRecord
 
     movie = find_or_create_movie(movie_string_id, film_at_uri, movie_data["parent"]["title"])
     associate_genres_with_movie(movie, movie_data["parent"]["genres"])
-    process_cinemas_and_schedules(movie_data, movie.id)
+    Cinema.process_cinemas_and_schedules(movie_data, movie.id)
   end
 
   def self.associate_genres_with_movie(movie, genres)
     return unless genres.present?
 
     genres.each do |genre_name|
-      genre = find_or_create_genre(genre_name)
+      genre = Genre.find_or_create_genre(genre_name)
       movie.genres << genre unless movie.genres.include?(genre)
     end
   end
@@ -73,17 +74,12 @@ class Movie < ApplicationRecord
 =end
   end
 
-  def self.delete_old_schedules(date)
-    schedules_to_delete = Schedule.where("time < ?", Date.today)
-    schedules_to_delete.destroy_all unless schedules_to_delete.empty?
-  end
-
-  def self.delete_movies_without_schedules
-    Movie.left_outer_joins(:schedules).where(schedules: { id: nil }).find_each(&:destroy)
+  scope :delete_movies_without_schedules, -> do
+    left_outer_joins(:schedules).where(schedules: { id: nil }).find_each(&:destroy)
   end
 
   def self.find_or_create_movie(movie_string_id, film_at_uri, movie_title)
-    movie = Movie.find_or_initialize_by(movie_id: movie_string_id)
+    movie = find_or_initialize_by(movie_id: movie_string_id)
     movie.title = movie_title if movie.new_record?
     movie.movie_id = movie_string_id if movie.new_record?
 
@@ -97,7 +93,7 @@ class Movie < ApplicationRecord
     movie
   end
 
-  def self.update_movie_with_additional_info(uri, movie)
+  scope :update_movie_with_additional_info, ->(uri, movie) do
     additional_info = get_additional_info(uri, "article div p span.release")
     return if additional_info.nil?
     add_info_squish = additional_info.squish
@@ -109,35 +105,29 @@ class Movie < ApplicationRecord
     movie.update(countries: country_string, year: year)
   end
 
-  def self.process_cinemas_and_schedules(movie_json, movie_id)
-    movie_json["nestedResults"].each do |nested_result|
-      next unless nested_result["parent"]["county"] == VIENNA
-      cinema = find_or_create_cinema(nested_result["parent"])
-      create_schedules_with_tags(nested_result["screenings"], movie_id, cinema.id)
-    end
-  end
+  # def self.process_cinemas_and_schedules(movie_json, movie_id)
+  #   movie_json["nestedResults"].each do |nested_result|
+  #     next unless nested_result["parent"]["county"] == VIENNA
+  #     cinema = find_or_create_cinema(nested_result["parent"])
+  #     create_schedules_with_tags(nested_result["screenings"], movie_id, cinema.id)
+  #   end
+  # end
 
-  def self.create_schedules_with_tags(screenings, movie_id, cinema_id)
-    screenings.each do |screening|
-      schedule = Schedule.create_schedule(screening, movie_id, cinema_id)
-      associate_tags_with_schedule(screening["tags"], schedule) if screening["tags"]
-    end
-  end
-
-  def self.associate_tags_with_schedule(tags, schedule)
-    return unless schedule
-
-    tags.each do |tag_name|
-      tag = find_or_create_tag(tag_name)
-      schedule.tags << tag unless schedule.tags.include?(tag)
-    end
-  end
-
-  def self.find_or_create_genre(genre)
-    genre = Genre.find_or_initialize_by(name: genre)
-    genre.save if genre.new_record?
-    genre
-  end
+  # def self.create_schedules_with_tags(screenings, movie_id, cinema_id)
+  #   screenings.each do |screening|
+  #     schedule = Schedule.create_schedule(screening, movie_id, cinema_id)
+  #     associate_tags_with_schedule(screening["tags"], schedule) if screening["tags"]
+  #   end
+  # end
+  #
+  # def self.associate_tags_with_schedule(tags, schedule)
+  #   return unless schedule
+  #
+  #   tags.each do |tag_name|
+  #     tag = Tag.find_or_create_tag(tag_name)
+  #     schedule.tags << tag unless schedule.tags.include?(tag)
+  #   end
+  # end
 
   def self.get_additional_info(uri, html_parse_string)
     NokogiriService.call(uri, html_parse_string)
@@ -182,33 +172,6 @@ class Movie < ApplicationRecord
     cinema_url
   end
 
-  # def self.create_schedule(screening, movie_id, cinema_id)
-  #   schedule_id = "s-" + movie_id.to_s + "-" + cinema_id.to_s + "-" + screening["time"]
-  #   begin
-  #     schedule_created = Schedule.create!(time: screening["time"],
-  #                                         three_d: screening["3d"],
-  #                                         ov: screening["ov"],
-  #                                         info: screening["info"],
-  #                                         movie_id: movie_id,
-  #                                         cinema_id: cinema_id,
-  #                                         schedule_id: schedule_id)
-  #   rescue Exception => ex
-  #     Rails.logger.error "ERROR " + ex.to_s
-  #     schedule_created = Schedule.find_by(schedule_id: schedule_id)
-  #   end
-  #   schedule_created
-  # end
-
-  def self.find_or_create_tag(tag)
-    tag_id = "t-" + tag.downcase.gsub(" ", "-").downcase
-    puts tag.inspect
-    tag = Tag.find_or_initialize_by(name: tag)
-    tag.save if tag.new_record?
-    tag
-  end
-
-  def self.create_movie_id(title)
-    "m-#{title.downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}"
-  end
+  scope :create_movie_id, ->(title) { "m-#{title.downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}" }
 
 end
