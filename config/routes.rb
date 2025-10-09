@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "/legal", to: "legal#show"
   get "start_page/home"
   get "fetch_movies/get"
   get "/cinemas", to: "cinemas#index", as: "cinemas"

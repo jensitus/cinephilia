@@ -105,30 +105,6 @@ class Movie < ApplicationRecord
     movie.update(countries: country_string, year: year)
   end
 
-  # def self.process_cinemas_and_schedules(movie_json, movie_id)
-  #   movie_json["nestedResults"].each do |nested_result|
-  #     next unless nested_result["parent"]["county"] == VIENNA
-  #     cinema = find_or_create_cinema(nested_result["parent"])
-  #     create_schedules_with_tags(nested_result["screenings"], movie_id, cinema.id)
-  #   end
-  # end
-
-  # def self.create_schedules_with_tags(screenings, movie_id, cinema_id)
-  #   screenings.each do |screening|
-  #     schedule = Schedule.create_schedule(screening, movie_id, cinema_id)
-  #     associate_tags_with_schedule(screening["tags"], schedule) if screening["tags"]
-  #   end
-  # end
-  #
-  # def self.associate_tags_with_schedule(tags, schedule)
-  #   return unless schedule
-  #
-  #   tags.each do |tag_name|
-  #     tag = Tag.find_or_create_tag(tag_name)
-  #     schedule.tags << tag unless schedule.tags.include?(tag)
-  #   end
-  # end
-
   def self.get_additional_info(uri, html_parse_string)
     NokogiriService.call(uri, html_parse_string)
   end

@@ -20,9 +20,10 @@ module TmdbUtility
     if tmdb_id != nil
       description = get_additional_info_from_tmdb(tmdb_id.to_s, "overview")
       poster_path = get_additional_info_from_tmdb(tmdb_id.to_s, "poster_path")
+      runtime = get_additional_info_from_tmdb(tmdb_id.to_s, "runtime")
       credits = fetch_credits(tmdb_id.to_s)
     end
-    assign_movie_attributes(movie, tmdb_id, description, poster_path, credits)
+    assign_movie_attributes(movie, tmdb_id, description, poster_path, credits, runtime)
   end
 
   def self.fetch_tmdb_id(url, year, movie_query_title, movie_title_json)
@@ -191,8 +192,8 @@ module TmdbUtility
     query.match?(/\A\?*\z/) || query.match?(/\A.{4} .\z/) ? NormalizeAndCleanService.call(fallback_title) : query
   end
 
-  def self.assign_movie_attributes(movie, tmdb_id, description, poster_path, credits)
-    movie.update(tmdb_id: tmdb_id, description: description, poster_path: poster_path)
+  def self.assign_movie_attributes(movie, tmdb_id, description, poster_path, credits, runtime)
+    movie.update(tmdb_id: tmdb_id, description: description, poster_path: poster_path, runtime: runtime)
     assign_credits_to_movie(movie, credits) if credits
   end
 
