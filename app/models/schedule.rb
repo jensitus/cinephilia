@@ -26,6 +26,8 @@ class Schedule < ApplicationRecord
     else
       Rails.logger.info(result.inspect)
     end
+    schedule = find_by(schedule_id: schedule_id)
+    schedule
   end
 
   scope :delete_old_schedules, ->(date) do

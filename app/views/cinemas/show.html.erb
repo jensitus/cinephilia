@@ -26,6 +26,11 @@
                     <span class="text-secondary small">
                       <%= schedule_value.info %>
                     </span>
+                    <% schedule_value.tags.each do |tag| %>
+                      <span class="text-secondary small">
+                        <%= tag.name %>
+                      </span>
+                    <% end %>
                   <% end %>
                 </div>
               </div>

@@ -12,7 +12,7 @@ class Movie < ApplicationRecord
 
   BASE_MOVIE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/"
   VIENNA = "Wien"
-  DAYS_TO_FETCH = 7
+  DAYS_TO_FETCH = 17
 
   def self.set_date
     current_date = Date.today
@@ -132,21 +132,12 @@ class Movie < ApplicationRecord
     TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
   end
 
-  def self.find_or_create_cinema(cinema)
-    theater_id = "t-" + cinema["title"].gsub(" ", "-").downcase
-    cinema = Cinema.find_or_create_by(cinema_id: theater_id)
-    cinema.update(title: cinema["title"], county: cinema["county"], uri: get_cinema_url(cinema["uri"].gsub("/filmat", "")), cinema_id: theater_id) if cinema.new_record?
-    cinema
-  end
-
-  def self.get_cinema_url(uri)
-    cinema_url = nil
-    content = get_additional_info(uri, "main div section div div p a")
-    if content.start_with?("http")
-      cinema_url = content
-    end
-    cinema_url
-  end
+  # def self.find_or_create_cinema(cinema)
+  #   theater_id = "t-" + cinema["title"].gsub(" ", "-").downcase
+  #   cinema = Cinema.find_or_create_by(cinema_id: theater_id)
+  #   cinema.update(title: cinema["title"], county: cinema["county"], uri: get_cinema_url(cinema["uri"].gsub("/filmat", "")), cinema_id: theater_id) if cinema.new_record?
+  #   cinema
+  # end
 
   scope :create_movie_id, ->(title) { "m-#{title.downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}" }
 

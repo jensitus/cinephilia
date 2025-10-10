@@ -22,9 +22,14 @@
                 <span class="text-secondary small">
                   <%= k.info %>
                 </span>
+                <% k.tags.each do |tag| %>
+                  <span class="text-secondary small">
+                    <%= tag.name %>
+                  </span>
+                <% end %>
               <% end %>
-              <hr>
             <% end %>
+            <hr>
           <% end %>
         </div>
       </div>

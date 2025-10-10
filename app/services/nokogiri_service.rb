@@ -31,9 +31,11 @@ class NokogiriService < BaseService
   end
 
   def parse_docs(docs)
+    content = nil
     docs.css(@css).each do |link|
-      return link.content
+      content = link.content
     end
+    content
   end
 
 end

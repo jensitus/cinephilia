@@ -12,7 +12,7 @@
 
   <div>
     <strong>Web:</strong>
-    <%= link_to cinema.uri, cinema.uri, target: :_blank %>
+    <%= link_to cinema.uri, cinema.uri, target: :_blank unless cinema.uri.nil? %>
   </div>
 
 </div>
