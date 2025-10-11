@@ -1,0 +1,46 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1><%= @tag.name %></h1>
+    </div>
+  </div>
+  <div class="row mt-5">
+    <% @movie_schedules.each do |date, cine| %>
+      <div class="col-md-2">
+        <div class="col p-2 m-2 bg-secondary text-white rounded">
+          <b><%= date %></b>
+        </div>
+      </div>
+      <div class="col-md-10">
+
+        <% cine.each do |cinema, v| %>
+          <div class="row">
+            <div class="col-md-12 p-2 m-2 bg-body-secondary text-black rounded">
+              <b><%= cinema %></b>
+            </div>
+
+            <% v.each do |value| %>
+
+              <div class="col-md-4 mb-3">
+                <div>
+                  <%= image_tag("https://image.tmdb.org/t/p/w500" + value.movie.poster_path, width: "60", class: "float-start me-3") unless value.movie.poster_path.nil? %>
+                </div>
+                <div>
+                  <%= link_to value.movie.title, "/movies/" + value.movie.id.to_s %>
+                </div>
+                <div>
+                  <%= value.time.in_time_zone("Vienna").strftime("%H:%M") %>
+                </div>
+                <div>
+                  <%= truncate_and_link(value.movie.description, length: 150, url: "/movies/" + value.movie.id.to_s) %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+  </div>
+</div>
+

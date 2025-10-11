@@ -1,0 +1,12 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1>Festivals</h1>
+    </div>
+    <div class="col-md-12">
+      <% @tags.each do |tag| %>
+        <b><%= link_to tag.name, "/tags/" + tag.id.to_s, class: 'do_not_underline' %></b>
+      <% end %>
+    </div>
+  </div>
+</div>

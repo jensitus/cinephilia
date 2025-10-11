@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "tags", to: "tags#index"
+  get "tags/:id", to: "tags#show"
   get "/legal", to: "legal#show"
   get "start_page/home"
   get "fetch_movies/get"

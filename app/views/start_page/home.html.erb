@@ -1,7 +1,15 @@
 <div class="container">
   <div class="row">
     <div class="col-md-3 m-2">
-      <%= image_tag "/cinephilia_logo_red.png", width: 250 %>
+      <div class="row">
+        <%= image_tag "/cinephilia_logo_red.png", width: 250 %>
+      </div>
+      <div class="row mt-5">
+        <% @tags.each do |tag| %>
+          <b><%= link_to tag.name, "/tags/" + tag.id.to_s, class: 'do_not_underline' %></b>
+        <% end %>
+      </div>
+
     </div>
     <div class="col-md-8">
       <% @movie_hash.each do |key, value| %>

@@ -1,6 +1,7 @@
 class StartPageController < ApplicationController
   before_action :set_movies
   before_action :cinemas_for_homepage
+  before_action :get_tags
 
   VOTIV_KINO = "Votiv Kino"
   DE_FRANCE = "De France"
@@ -26,6 +27,11 @@ class StartPageController < ApplicationController
     @gartenbau =  Cinema.get_random_movie_for_start_page GARTENBAU_KINO
     @votiv     =  Cinema.get_random_movie_for_start_page VOTIV_KINO
     @de_france =  Cinema.get_random_movie_for_start_page DE_FRANCE
+  end
+
+  def get_tags
+    @tags = Tag.all
+    @tags.delete(Tag.left_outer_joins(:schedules).where(schedules: { id: nil }))
   end
 
 end

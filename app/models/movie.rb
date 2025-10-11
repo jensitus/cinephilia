@@ -89,6 +89,9 @@ class Movie < ApplicationRecord
       tmdb_id = fetch_tmdb_id(movie.original_title, movie.title, movie.year)
       TmdbUtility.fetch_movie_info_from_tmdb(movie, tmdb_id) unless tmdb_id.nil?
     end
+    if movie.description.nil? || movie.description == ""
+      TmdbUtility.fetch_movie_info_from_tmdb(movie, tmdb_id) # unless tmdb_id.nil?
+    end
     movie.save if movie.changed?
     movie
   end

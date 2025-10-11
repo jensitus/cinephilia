@@ -17,12 +17,18 @@ module TmdbUtility
   end
 
   def self.fetch_movie_info_from_tmdb(movie, tmdb_id)
-    if tmdb_id != nil
-      description = get_additional_info_from_tmdb(tmdb_id.to_s, "overview")
-      poster_path = get_additional_info_from_tmdb(tmdb_id.to_s, "poster_path")
-      runtime = get_additional_info_from_tmdb(tmdb_id.to_s, "runtime")
-      credits = fetch_credits(tmdb_id.to_s)
+    description = nil
+    if description.nil? || description == ""
+      if tmdb_id != nil
+        description = get_additional_info_from_tmdb(tmdb_id.to_s, "overview")
+      elsif movie.tmdb_id != nil
+        description = get_additional_info_from_tmdb(movie.tmdb_id.to_s, "overview")
+      end
     end
+    poster_path = get_additional_info_from_tmdb(tmdb_id.to_s, "poster_path")
+    runtime = get_additional_info_from_tmdb(tmdb_id.to_s, "runtime")
+    credits = fetch_credits(tmdb_id.to_s)
+
     assign_movie_attributes(movie, tmdb_id, description, poster_path, credits, runtime)
   end
 
@@ -56,7 +62,7 @@ module TmdbUtility
   def self.process_tmdb_result(tmdb_result, movie_query_title, movie_title_json, year)
 
     if match_original_title?(tmdb_result, movie_query_title, movie_title_json) ||
-      match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
+       match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
 
       presumable_tmdb_id = tmdb_result["id"]
       tmdb_single_result = fetch_tmdb_single_result_by_tmdb_id(presumable_tmdb_id)
@@ -131,8 +137,12 @@ module TmdbUtility
     get_tmdb_results(url)
   end
 
-  def self.get_additional_info_from_tmdb(tmdb_id, kind_of_info)
-    uri = UriService.call("#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}?#{LANGUAGE_REGION}")
+  def self.get_additional_info_from_tmdb(tmdb_id, kind_of_info, without_language_region = false)
+    if without_language_region
+      uri = UriService.call("#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}")
+    else
+      uri = UriService.call("#{TMDB_MOVIE_ENDPOINT}/#{tmdb_id}?#{LANGUAGE_REGION}")
+    end
     return nil if uri.nil?
     tmdb_results = get_tmdb_results(uri)
     additional_info = tmdb_results["#{kind_of_info}"]
@@ -206,13 +216,13 @@ module TmdbUtility
   def self.extract_actors_from_credits(cast_members)
     cast_members.select { |member| member["known_for_department"] == "Acting" }
                 .map { |actor| actor["name"] }
-                .join(", ")
+                .join(", ") unless cast_members.nil?
   end
 
   def self.extract_directors_from_credits(crew_members)
     crew_members.select { |member| member["known_for_department"] == "Directing" && member["job"] == "Director" || member["department"] == "Directing" && member["job"] == "Director" }
                 .map { |director| director["name"] }
-                .join(", ")
+                .join(", ") unless crew_members.nil?
   end
 
 end

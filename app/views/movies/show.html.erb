@@ -24,7 +24,7 @@
                 </span>
                 <% k.tags.each do |tag| %>
                   <span class="text-secondary small">
-                    <%= tag.name %>
+                    <%= link_to tag.name, "/tags/" + tag.id.to_s, class: 'do_not_underline' %>
                   </span>
                 <% end %>
               <% end %>
