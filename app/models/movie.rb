@@ -19,7 +19,7 @@ class Movie < ApplicationRecord
     end_date = Date.today + DAYS_TO_FETCH
     fetch_movies_for_date_range(current_date, end_date)
     Schedule.delete_old_schedules(current_date)
-    delete_movies_without_schedules
+    # delete_movies_without_schedules
     Schedule.delete_schedules_without_movies
   end
 
@@ -134,13 +134,6 @@ class Movie < ApplicationRecord
     end
     TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
   end
-
-  # def self.find_or_create_cinema(cinema)
-  #   theater_id = "t-" + cinema["title"].gsub(" ", "-").downcase
-  #   cinema = Cinema.find_or_create_by(cinema_id: theater_id)
-  #   cinema.update(title: cinema["title"], county: cinema["county"], uri: get_cinema_url(cinema["uri"].gsub("/filmat", "")), cinema_id: theater_id) if cinema.new_record?
-  #   cinema
-  # end
 
   scope :create_movie_id, ->(title) { "m-#{title.downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}" }
 
