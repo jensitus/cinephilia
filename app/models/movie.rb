@@ -99,13 +99,19 @@ class Movie < ApplicationRecord
   scope :update_movie_with_additional_info, ->(uri, movie) do
     additional_info = get_additional_info(uri, "article div p span.release")
     return if additional_info.nil?
-    add_info_squish = additional_info.squish
-    additional_info_array = add_info_squish.split(",")
-    year = additional_info_array.last.strip
-    additional_info_array.delete_at(-1)
-    countries = additional_info_array.join(", ")
-    country_string = countries.chomp(", ").gsub("\n", "")
-    movie.update(countries: country_string, year: year)
+
+    info_parts = additional_info.squish.split(",").map(&:strip)
+    year = info_parts.pop
+    countries = info_parts.join(", ").chomp(", ").gsub("\n", "")
+    movie.update(countries: countries, year: year)
+
+    # add_info_squish = additional_info.squish
+    # additional_info_array = add_info_squish.split(",")
+    # year = additional_info_array.last.strip
+    # additional_info_array.delete_at(-1)
+    # countries = additional_info_array.join(", ")
+    # country_string = countries.chomp(", ").gsub("\n", "")
+    # movie.update(countries: country_string, year: year)
   end
 
   def self.get_additional_info(uri, html_parse_string)
