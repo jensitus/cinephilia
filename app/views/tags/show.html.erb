@@ -29,10 +29,22 @@
                   <%= link_to value.movie.title, "/movies/" + value.movie.id.to_s %>
                 </div>
                 <div>
-                  <%= value.time.in_time_zone("Vienna").strftime("%H:%M") %>
+                  <span class="text-black">
+                    <%= value.time.in_time_zone("Vienna").strftime("%H:%M") %>
+                  </span>
+                  <span class="text-secondary small">
+                    <%= value.info %>
+                  </span>
                 </div>
                 <div>
-                  <%= truncate_and_link(value.movie.description, length: 150, url: "/movies/" + value.movie.id.to_s) %>
+                  <span class="text-secondary small">
+                    <%= value.movie.countries %> <%= value.movie.year %> <%= value.movie.director %>
+                  </span>
+                </div>
+                <div>
+                  <span class="text-black">
+                    <%= truncate_and_link(value.movie.description, length: 170, url: "/movies/" + value.movie.id.to_s) %>
+                  </span>
                 </div>
               </div>
             <% end %>
