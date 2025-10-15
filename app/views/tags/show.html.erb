@@ -1,15 +1,18 @@
 <div class="container">
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-2"></div>
+    <div class="col-md-10">
       <h1><%= @tag.name %></h1>
     </div>
   </div>
   <div class="row mt-5">
     <% @movie_schedules.each do |date, cine| %>
+      <div class="col-md-1 sticky-top p-2 m-2 bg-primary-subtle text-black text-center rounded" style="top: 70px; z-index: 1;">
+        <b><%= date %></b>
+      </div>
+      <div class="col-md-11"></div>
       <div class="col-md-2">
-        <div class="col p-2 m-2 bg-secondary text-white rounded">
-          <b><%= date %></b>
-        </div>
+
       </div>
       <div class="col-md-10">
 

@@ -1,48 +1,69 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title><%= content_for(:title) || "Cinephilia" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<html class="h-100">
+<head>
+  <title><%= content_for(:title) || "Cinephilia" %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
 
-    <%= yield :head %>
+  <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+  <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+  <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" href="/favicon-32x32.png" type="image/png">
-    <link rel="icon" href="/favicon-32x32.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png">
+  <link rel="icon" href="/favicon-32x32.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
+  <%# Includes all stylesheet files in app/assets/stylesheets %>
+  <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+</head>
 
-  <body>
-  <nav class="navbar fixed-top bg-warning">
-    <div class="container-fluid">
-      <div class="navbar-text">
+<body class="d-flex flex-column h-100">
+<nav class="navbar fixed-top bg-warning">
+  <div class="container-fluid">
+    <div class="navbar-text">
       <span style="font-family: 'Baloo Bhaijaan',serif; font-weight: bold; font-size: x-large">
         <img src="/icon.png" alt="cinephilia" width="35">
         <%= link_to "Kino Wien", root_url, class: 'do_not_underline' %>
       </span>
-        <span class="m-3">
-          <%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %>
-        </span>
-        <span class="m-2">
-          <%= link_to "Movies", "/movies", class: 'do_not_underline' %>
-        </span>
-        <span class="m-2">
-          <%= link_to "Legal", "/legal", class: 'do_not_underline' %>
-        </span>
+      <span class="m-3">
+        <%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %>
+      </span>
+      <span class="m-2">
+        <%= link_to "Movies", "/movies", class: 'do_not_underline' %>
+      </span>
+    </div>
+
+  </div>
+</nav>
+<%= yield %>
+<footer class="footer bg-info-subtle mt-auto">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <div class="footer-brand"><b>cinephilia.at</b></div>
+        <p class="footer-text">Vienna's most famous cinema programme</p>
+        <div class="copyright text-left">
+          © 2025 cinephilia.at All rights reserved.
+        </div>
       </div>
 
+      <div class="col-md-6 text-md-start mt-3">
+        <ul class="footer-links">
+          <li><%= link_to "Kino Wien", root_url, class: 'do_not_underline' %></li>
+          <li><%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %></li>
+          <li><%= link_to "Movies", "/movies", class: 'do_not_underline' %></li>
+          <li><%= link_to "Legal", "/legal", class: 'do_not_underline' %></li>
+        </ul>
+      </div>
     </div>
-  </nav>
-    <%= yield %>
-  </body>
+  </div>
+</footer>
+
+
+</body>
 </html>
