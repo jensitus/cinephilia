@@ -41,7 +41,7 @@
   </div>
 </nav>
 <%= yield %>
-<footer class="footer bg-info-subtle mt-auto">
+<footer class="footer bg-white mt-auto">
   <div class="container">
     <div class="row align-items-center">
       <div class="col-md-6">
@@ -52,12 +52,11 @@
         </div>
       </div>
 
-      <div class="col-md-6 text-md-start mt-3">
+      <div class="col-md-6 text-md-start mt-5">
         <ul class="footer-links">
-          <li><%= link_to "Kino Wien", root_url, class: 'do_not_underline' %></li>
-          <li><%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %></li>
-          <li><%= link_to "Movies", "/movies", class: 'do_not_underline' %></li>
-          <li><%= link_to "Legal", "/legal", class: 'do_not_underline' %></li>
+          <li><small><%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %></small></li>
+          <li><small><%= link_to "Movies", "/movies", class: 'do_not_underline' %></small></li>
+          <li><small><%= link_to "Legal", "/legal", class: 'do_not_underline' %></small></li>
         </ul>
       </div>
     </div>
