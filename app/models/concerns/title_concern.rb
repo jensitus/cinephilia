@@ -17,11 +17,12 @@ module TitleConcern
 
   def self.match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
     tmdb_title = normalize_title(tmdb_result["title"])
-    tmdb_release_year = TmdbUtility.fetch_release_year(tmdb_result)
     normalized_json_title = normalize_title(movie_title_json)
-
-    (tmdb_title == movie_query_title && tmdb_release_year.to_i == year.to_i) ||
-      (tmdb_title == normalized_json_title && tmdb_release_year.to_i == year.to_i)
+    if movie_query_title.match?(/\A\?*\z/)
+      titles_match?(tmdb_title, movie_query_title)
+    else
+      titles_match?(tmdb_title, normalized_json_title)
+    end
   end
 
   def self.normalize_title(title)

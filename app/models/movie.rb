@@ -87,6 +87,10 @@ class Movie < ApplicationRecord
       movie.original_title = get_movie_query_title(film_at_uri, movie.title)
       update_movie_with_additional_info(film_at_uri, movie)
       tmdb_id = fetch_tmdb_id(movie.original_title, movie.title, movie.year)
+      if tmdb_id.nil?
+        tmdb_url = TmdbUtility.create_movie_search_url(movie.original_title, movie.title)
+        tmdb_id = TmdbUtility.fallback_tmdb_id(tmdb_url, movie.original_title, movie.title, movie.year, film_at_uri)
+      end
       TmdbUtility.fetch_movie_info_from_tmdb(movie, tmdb_id) unless tmdb_id.nil?
     end
     if movie.description.nil? || movie.description == ""
@@ -104,14 +108,6 @@ class Movie < ApplicationRecord
     year = info_parts.pop
     countries = info_parts.join(", ").chomp(", ").gsub("\n", "")
     movie.update(countries: countries, year: year)
-
-    # add_info_squish = additional_info.squish
-    # additional_info_array = add_info_squish.split(",")
-    # year = additional_info_array.last.strip
-    # additional_info_array.delete_at(-1)
-    # countries = additional_info_array.join(", ")
-    # country_string = countries.chomp(", ").gsub("\n", "")
-    # movie.update(countries: country_string, year: year)
   end
 
   def self.get_additional_info(uri, html_parse_string)
@@ -119,7 +115,10 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_tmdb_id(movie_original_title, movie_title, year)
-    tmdb_id = get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_original_title, movie_title, year)
+    tmdb_url = create_tmdb_url(movie_original_title, movie_title)
+    query_string = NormalizeAndCleanService.call(movie_original_title)
+    tmdb_id = TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title)
+    # tmdb_id = try_fetch_tmdb_id(movie_original_title, movie_title, year)
     tmdb_id
   end
 
@@ -131,16 +130,24 @@ class Movie < ApplicationRecord
     movie_query_title
   end
 
-  def self.get_movie_query_tmdb_url_and_further_get_tmdb_id(movie_query_title, movie_title_json, year)
+  def self.try_fetch_tmdb_id(movie_query_title, movie_title_json, year)
+    tmdb_url = create_tmdb_url(movie_query_title, movie_title_json)
+    query_string = NormalizeAndCleanService.call(movie_query_title)
+    TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
+  end
+
+  scope :create_movie_id, ->(title) {
+    "m-#{title.downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}"
+  }
+
+  def self.create_tmdb_url(movie_query_title, movie_title_json)
     query_string = NormalizeAndCleanService.call(movie_query_title)
     tmdb_url = TmdbUtility.create_movie_search_url(query_string, movie_title_json)
     if tmdb_url.nil?
       query_string = NormalizeAndCleanService.call(movie_title_json)
-      tmdb_url = TmdbUtility.create_movie_search_url(query_string, movie_title_json)
+      TmdbUtility.create_movie_search_url(query_string, movie_title_json)
     end
-    TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
+    tmdb_url
   end
-
-  scope :create_movie_id, ->(title) { "m-#{title.downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}" }
 
 end
