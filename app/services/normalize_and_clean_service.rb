@@ -13,15 +13,24 @@ class NormalizeAndCleanService < BaseService
   private
 
   def normalize_and_clean
-    normalized_string = I18n.transliterate(@to_be_normalized).downcase
+    decoded_string = decode_unicode_escapes(@to_be_normalized)
+    normalized_string = I18n.transliterate(decoded_string).downcase
     return_value = normalized_string.gsub("ä", "a")
                                     .gsub("ö", "o")
                                     .gsub("ü", "u")
                                     .gsub("ß", "ss")
+                                    .gsub("&", " ")
                                     .gsub(" -", "")
                                     .gsub(":", "")
                                     .gsub("'", "")
                                     .gsub(".", "")
+  end
+
+  def decode_unicode_escapes(string)
+    # Replace \uXXXX with actual Unicode characters
+    string.gsub(/\\u([0-9a-fA-F]{4})/) do
+      [$1.hex].pack("U")
+    end
   end
 
 end
