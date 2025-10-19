@@ -7,6 +7,7 @@ module TmdbUtility
 
   def self.create_movie_search_url(query, movie_title_json)
     query_param = MovieConcerns.build_query_string(query, movie_title_json)
+    query_param = NormalizeAndCleanService.call(query_param)
     UriService.call("#{TMDB_SEARCH_MOVIE_ENDPOINT}?query=#{query_param}&#{LANGUAGE_REGION}")
   end
 
