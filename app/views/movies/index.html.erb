@@ -5,19 +5,25 @@
       <% content_for :title, "Movies" %>
       <h1>Movies</h1>
       <div id="movies">
-        <% @movies.each do |movie| %>
-          <div class="row mt-2">
-            <div class="col-2">
-              <% if movie.poster_path != nil %>
-                <%= image_tag("https://image.tmdb.org/t/p/w500" + movie.poster_path, width: "100%", class: "float-start me-3") %>
+        <% @movies_by_letter.each do |letter, movies| %>
+          <div class="row mb-1">
+            <div class="col p-2 m-2 bg-secondary text-white rounded">
+              <b><%= letter %></b>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <% movies.each_with_index do |movie, index| %>
+              <div class="col-md-2">
+                <%= image_tag("https://image.tmdb.org/t/p/w500" + movie[:poster_path], width: "80%", class: "img-fluid") unless movie[:poster_path] == nil %>
+              </div>
+              <div class="col-md-10 mb-3">
+                <%= link_to movie[:title], "/movies/#{movie[:id]}" %>
+              </div>
+              <% unless index == movies.length - 1 %>
+                <div class="col-12"><hr></div>
               <% end %>
-            </div>
-            <div class="col-10">
-              <%= movie.title %>
-              <p>
-                <%= link_to "Show this movie", movie %>
-              </p>
-            </div>
+            <% end %>
           </div>
         <% end %>
       </div>

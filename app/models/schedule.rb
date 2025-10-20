@@ -32,10 +32,7 @@ class Schedule < ApplicationRecord
 
   scope :delete_old_schedules, ->(date) do
     schedules_to_delete = where("time < ?", Date.today)
-    schedules_to_delete.each do |schedule|
-      schedule.destroy if schedule.tags.empty?
-    end unless schedules_to_delete.empty?
-    # schedules_to_delete.destroy_all unless schedules_to_delete.empty?
+    schedules_to_delete.destroy_all unless schedules_to_delete.empty?
   end
 
   scope :delete_schedules_without_movies, -> do
