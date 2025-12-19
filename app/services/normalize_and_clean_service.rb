@@ -24,6 +24,7 @@ class NormalizeAndCleanService < BaseService
                                     .gsub(":", "")
                                     .gsub("'", "")
                                     .gsub(".", "")
+                                    .gsub("#", "")
   end
 
   def decode_unicode_escapes(string)

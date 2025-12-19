@@ -142,6 +142,9 @@ class Movie < ApplicationRecord
 
   def self.create_tmdb_url(movie_query_title, movie_title_json)
     query_string = NormalizeAndCleanService.call(movie_query_title)
+    if query_string.count('?') > 2
+      query_string = movie_title_json
+    end
     tmdb_url = TmdbUtility.create_movie_search_url(query_string, movie_title_json)
     if tmdb_url.nil?
       query_string = NormalizeAndCleanService.call(movie_title_json)
