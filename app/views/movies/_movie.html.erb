@@ -18,7 +18,7 @@
     <% end %>
   </div>
   <div class="mb-2">
-    <% if movie.runtime > 0 %>
+    <% if !movie.runtime.nil? && movie.runtime > 0 %>
       <%= movie.runtime %> min
     <% end %>
   </div>
