@@ -150,9 +150,9 @@ class Movie < ApplicationRecord
     TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, movie_title_json)
   end
 
-  scope :create_movie_id, ->(title) {
-    "m-#{title.downcase.tr(" ", "-").gsub("---", "-").tr(",", "-")}"
-  }
+  def self.create_movie_id(title)
+    "m-#{title.downcase.tr(' ', '-').gsub('---', '-').tr(',', '-')}"
+  end
 
   def self.create_tmdb_url(movie_query_title, movie_title_json)
     query_string = NormalizeAndCleanService.call(movie_query_title)
