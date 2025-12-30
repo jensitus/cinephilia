@@ -1,23 +1,23 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  movie_id: MyString
-  title: MyString
-  description: MyText
-  year: MyString
-  countries: MyString
-  poster_path: MyString
-  actors: MyString
-  director: MyString
-  tmdb_id: MyString
+  movie_id: movie_1
+  title: Erster Film
+  description: Cooler Film
+  year: 2025
+  countries: AT
+  poster_path: nil
+  actors: nil
+  director: nil
+  tmdb_id: 1234
 
 two:
-  movie_id: MyString
-  title: MyString
-  description: MyText
-  year: MyString
-  countries: MyString
-  poster_path: MyString
-  actors: MyString
-  director: MyString
-  tmdb_id: MyString
+  movie_id: movie_2
+  title: Zweiter Film
+  description: Nicht so cooler Film
+  year: 2025
+  countries: AT
+  poster_path: nil
+  actors: nil
+  director: nil
+  tmdb_id: 3214

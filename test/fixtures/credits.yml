@@ -1,15 +1,14 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# test/fixtures/credits.yml
 
 one:
-  role: MyString
-  string,: MyString
-  job: MyString
-  character: MyString
+  movie: one
+  person: one
+  role: cast
+  character: "Main Hero"
   order: 1
 
 two:
-  role: MyString
-  string,: MyString
-  job: MyString
-  character: MyString
-  order: 1
+  movie: one
+  person: two
+  role: crew
+  job: "Director"

@@ -32,6 +32,7 @@ module TmdbUtility
   def self.fetch_tmdb_id(url, year, movie_query_title, movie_title_json)
     tmdb_results = get_tmdb_results(url)
     return unless tmdb_results
+    return unless tmdb_results["results"]
 
     tmdb_results["results"].each do |tmdb_result|
       presumable_tmdb_id = process_tmdb_result(tmdb_result, movie_query_title, movie_title_json, year)
