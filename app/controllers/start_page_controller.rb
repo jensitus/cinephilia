@@ -36,5 +36,4 @@ class StartPageController < ApplicationController
     @tags = Tag.all
     @tags.delete(Tag.left_outer_joins(:schedules).where(schedules: { id: nil }))
   end
-
 end

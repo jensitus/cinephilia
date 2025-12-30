@@ -1,5 +1,4 @@
 module TmdbUtility
-
   TMDB_BASE_URL = "https://api.themoviedb.org/3".freeze
   TMDB_SEARCH_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/search/movie".freeze
   TMDB_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/movie".freeze
@@ -40,7 +39,6 @@ module TmdbUtility
     end
 
     nil
-
   end
 
   def self.fallback_tmdb_id(url, movie_query_title, movie_title_json, year, film_at_uri)
@@ -193,5 +191,4 @@ module TmdbUtility
     single_result = tmdb_results["results"].first
     the_other_way_around(single_result["id"], movie_title_json, year, film_at_uri)
   end
-
 end

@@ -10,9 +10,9 @@ class CreateCredits < ActiveRecord::Migration[8.0]
 
       t.timestamps
 
-      t.index [:movie_id, :person_id, :role]
+      t.index [ :movie_id, :person_id, :role ]
 
-      t.index [:movie_id, :person_id, :role, :job, :character],
+      t.index [ :movie_id, :person_id, :role, :job, :character ],
               unique: true,
               name: 'index_credits_on_uniqueness'
     end

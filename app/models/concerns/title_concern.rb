@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module TitleConcern
-
   def self.titles_match?(title_one, title_two)
     return false if title_one.nil? || title_two.nil?
     normalize_title(title_one).eql?(normalize_title(title_two))
@@ -28,5 +27,4 @@ module TitleConcern
   def self.normalize_title(title)
     NormalizeAndCleanService.call(title.downcase)
   end
-
 end

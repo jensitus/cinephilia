@@ -1,5 +1,4 @@
 module StartPageHelper
-
   def truncate_and_link(text, options = {})
     length = options[:length] || 100
     url = options[:url] || "#"
@@ -9,5 +8,4 @@ module StartPageHelper
     output += link_to(" more", url, class: "more")
     output.html_safe
   end
-
 end

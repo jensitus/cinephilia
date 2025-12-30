@@ -24,7 +24,6 @@ class CinemasController < ApplicationController
   end
 
   def set_cinema_schedules
-
     schedules_by_date = @cinema.schedules.order(:time).group_by do |schedule|
       schedule.time.strftime("%d.%m.")
     end
@@ -32,6 +31,5 @@ class CinemasController < ApplicationController
     @cinema_schedules = schedules_by_date.transform_values do |schedules|
       schedules.group_by { |schedule| schedule.movie.title }.to_h
     end
-
   end
 end

@@ -1,5 +1,4 @@
 class NokogiriService < BaseService
-
   def initialize(url, css_to_parse, director = false)
     @url = url
     @css = css_to_parse
@@ -55,5 +54,4 @@ class NokogiriService < BaseService
     end
     director
   end
-
 end

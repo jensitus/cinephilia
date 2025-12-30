@@ -1,6 +1,6 @@
 class TagsController < ApplicationController
-  before_action :set_tag, only: [:show]
-  before_action :set_movie_schedules, only: [:show]
+  before_action :set_tag, only: [ :show ]
+  before_action :set_movie_schedules, only: [ :show ]
 
   def index
     @tags = Tag.all
@@ -8,7 +8,6 @@ class TagsController < ApplicationController
   end
 
   def show
-
   end
 
   private
@@ -19,7 +18,6 @@ class TagsController < ApplicationController
   end
 
   def set_movie_schedules
-
     schedules_by_date = @tag.schedules.order(:time).group_by do |schedule|
       schedule.time.strftime("%d.%m.")
     end
@@ -27,7 +25,5 @@ class TagsController < ApplicationController
     @movie_schedules = schedules_by_date.transform_values do |schedules|
       schedules.group_by { |schedule| schedule.cinema.title }.to_h
     end
-
   end
-
 end

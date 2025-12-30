@@ -54,5 +54,4 @@ class Schedule < ApplicationRecord
       schedule.tags << tag unless schedule.tags.include?(tag)
     end
   end
-
 end

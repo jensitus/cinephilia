@@ -5,10 +5,10 @@ class Person < ApplicationRecord
   validates :name, presence: true
 
   def acting_credits
-    credits.where(role: 'cast')
+    credits.where(role: "cast")
   end
 
   def directing_credits
-    credits.where(role: 'crew', job: 'Director')
+    credits.where(role: "crew", job: "Director")
   end
 end

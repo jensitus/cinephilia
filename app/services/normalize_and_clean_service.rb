@@ -1,5 +1,4 @@
 class NormalizeAndCleanService < BaseService
-
   attr_reader :to_be_normalized
 
   def initialize(to_be_normalized)
@@ -30,8 +29,7 @@ class NormalizeAndCleanService < BaseService
   def decode_unicode_escapes(string)
     # Replace \uXXXX with actual Unicode characters
     string.gsub(/\\u([0-9a-fA-F]{4})/) do
-      [$1.hex].pack("U")
+      [ $1.hex ].pack("U")
     end
   end
-
 end

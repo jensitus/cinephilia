@@ -8,5 +8,4 @@ class ApplicationController < ActionController::Base
   def skip_session_cookie
     request.session_options[:skip] = true
   end
-
 end

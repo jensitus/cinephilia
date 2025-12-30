@@ -85,5 +85,4 @@ class MovieConcerns
                 .map { |director| director["name"] }
                 .join(", ") unless crew_members.nil?
   end
-
 end

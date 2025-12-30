@@ -34,6 +34,5 @@ class MoviesController < ApplicationController
     @movie_schedules = schedules_by_date.transform_values do |schedules|
       schedules.group_by { |schedule| schedule.cinema.title }.to_h
     end
-
   end
 end

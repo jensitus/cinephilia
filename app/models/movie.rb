@@ -80,7 +80,6 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_and_parse_movies(url)
-
     response = Net::HTTP.get(url)
     JSON.parse(response)["result"]
 =begin
@@ -167,5 +166,4 @@ class Movie < ApplicationRecord
     end
     tmdb_url
   end
-
 end
