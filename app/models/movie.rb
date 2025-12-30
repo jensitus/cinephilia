@@ -15,7 +15,7 @@ class Movie < ApplicationRecord
 
   BASE_MOVIE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/"
   VIENNA = "Wien"
-  DAYS_TO_FETCH = 2
+  DAYS_TO_FETCH = 17
 
   def cast_members
     credits.where(role: "cast").includes(:person).order(:order)
