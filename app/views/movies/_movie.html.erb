@@ -5,31 +5,35 @@
   <% end %>
 
   <div class="mt-3 mb-3">
-    <strong>
+    <h1>
       <%= movie.title %>
-    </strong>
+    </h1>
   </div>
-  <div class="mt-2">
-    <%= movie.countries %> <%= movie.year %>
-  </div>
-  <div>
-    <% movie.genres.each do |genre| %>
-      <%= genre.name %>
+
+  <div class="metadata">
+    <% if movie.year.present? %>
+      <span class="badge"><%= movie.year %></span>
+    <% end %>
+
+    <% if movie.runtime.present? %>
+      <span class="badge"><%= movie.runtime %> min</span>
+    <% end %>
+
+    <% if movie.countries.present? %>
+      <span class="badge"><%= movie.countries %></span>
     <% end %>
   </div>
-  <div class="mb-2">
-    <% if !movie.runtime.nil? && movie.runtime > 0 %>
-      <%= movie.runtime %> min
-    <% end %>
-  </div>
+
+  <% if movie.genres.any? %>
+    <div class="genres">
+      <% movie.genres.each do |genre| %>
+        <span class="genre-tag"><%= genre.name %></span>
+      <% end %>
+    </div>
+  <% end %>
 
   <div>
     <%= movie.description %>
-  </div>
-
-  <div class="mt-2 mb-2 small">
-    <%= "D: " + movie.director unless movie.director == nil %> <br>
-    <%= "A: " + movie.actors unless movie.actors == nil %>
   </div>
 
 </div>

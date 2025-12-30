@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  role: MyString
+  string,: MyString
+  job: MyString
+  character: MyString
+  order: 1
+
+two:
+  role: MyString
+  string,: MyString
+  job: MyString
+  character: MyString
+  order: 1

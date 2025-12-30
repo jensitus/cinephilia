@@ -10,9 +10,24 @@ class Movie < ApplicationRecord
   has_many :schedules
   has_many :cinemas, through: :schedules
 
+  has_many :credits, dependent: :destroy
+  has_many :people, through: :credits
+
   BASE_MOVIE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/"
   VIENNA = "Wien"
-  DAYS_TO_FETCH = 17
+  DAYS_TO_FETCH = 2
+
+  def cast_members
+    credits.where(role: "cast").includes(:person).order(:order)
+  end
+
+  def crew_members
+    credits.where(role: "crew").includes(:person)
+  end
+
+  def directors
+    people.joins(:credits).where(credits: { role: "crew", job: "Director" })
+  end
 
   def self.set_date
     current_date = Date.today
@@ -142,7 +157,7 @@ class Movie < ApplicationRecord
 
   def self.create_tmdb_url(movie_query_title, movie_title_json)
     query_string = NormalizeAndCleanService.call(movie_query_title)
-    if query_string.count('?') > 2
+    if query_string.count("?") > 2
       query_string = movie_title_json
     end
     tmdb_url = TmdbUtility.create_movie_search_url(query_string, movie_title_json)

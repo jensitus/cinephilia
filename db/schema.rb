@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_26_201147) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_28_063100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -22,6 +22,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_201147) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["cinema_id"], name: "index_cinemas_on_cinema_id", unique: true
+  end
+
+  create_table "credits", force: :cascade do |t|
+    t.bigint "movie_id", null: false
+    t.bigint "person_id", null: false
+    t.string "role", null: false
+    t.string "job"
+    t.string "character"
+    t.integer "order"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["movie_id", "person_id", "role", "job", "character"], name: "index_credits_on_uniqueness", unique: true
+    t.index ["movie_id", "person_id", "role"], name: "index_credits_on_movie_id_and_person_id_and_role"
+    t.index ["movie_id"], name: "index_credits_on_movie_id"
+    t.index ["person_id"], name: "index_credits_on_person_id"
   end
 
   create_table "genres", force: :cascade do |t|
@@ -52,6 +67,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_201147) do
     t.string "original_title"
     t.integer "runtime"
     t.index ["movie_id"], name: "index_movies_on_movie_id", unique: true
+  end
+
+  create_table "people", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "tmdb_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_people_on_name"
+    t.index ["tmdb_id"], name: "index_people_on_tmdb_id", unique: true
   end
 
   create_table "posts", force: :cascade do |t|
@@ -87,4 +111,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_201147) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "credits", "movies"
+  add_foreign_key "credits", "people"
 end
