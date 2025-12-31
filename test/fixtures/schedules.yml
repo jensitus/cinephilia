@@ -3,17 +3,17 @@
 one:
   time: 2025-08-20 17:44:40
   three_d: false
-  ov: false
-  info: MyString
-  movie_id: 
-  cinema_id: 
-  schedule_id: MyString
+  ov: true
+  info: "OV"
+  movie_id: 1
+  cinema_id: 1
+  schedule_id: MyString_1
 
 two:
-  time: 2025-08-20 17:44:40
+  time: 2025-08-20 18:45:40
   three_d: false
   ov: false
   info: MyString
-  movie_id: 
-  cinema_id: 
-  schedule_id: MyString
+  movie_id: 2
+  cinema_id: 2
+  schedule_id: MyString_2

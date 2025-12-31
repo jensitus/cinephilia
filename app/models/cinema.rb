@@ -12,7 +12,7 @@ class Cinema < ApplicationRecord
 
   def self.get_random_movie_for_start_page(cinema)
     Movie.distinct.joins(schedules: :cinema)
-         .where(cinemas: { title: [cinema] })
+         .where(cinemas: { title: [ cinema ] })
          .select("movies.title, movies.id, movies.description, movies.poster_path, cinemas.title AS cinema_title")
   end
 
@@ -45,5 +45,4 @@ class Cinema < ApplicationRecord
     end unless content.nil?
     cinema_url
   end
-
 end

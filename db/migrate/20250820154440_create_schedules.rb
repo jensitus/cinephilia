@@ -11,7 +11,7 @@ class CreateSchedules < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    add_index :schedules, [:time, :movie_id, :cinema_id], unique: true
+    add_index :schedules, [ :time, :movie_id, :cinema_id ], unique: true
     add_index :schedules, :cinema_id
     add_index :schedules, :movie_id
   end

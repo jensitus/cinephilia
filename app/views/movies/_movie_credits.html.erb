@@ -1,0 +1,59 @@
+<!-- app/views/movies/_movie_credits.html.erb -->
+<div class="credits-section">
+  <% directors = movie.credits.where(role: 'crew', job: 'Director').includes(:person) %>
+  <% if directors.any? %>
+    <div class="directors-block">
+      <b><%= 'Director'.pluralize(directors.count) + ':' %></b>
+      <%= directors.map { |credit| credit.person.name }.to_sentence(last_word_connector: ' and ') %>
+
+    </div>
+  <% end %>
+
+  <% cast = movie.credits.where(role: 'cast').includes(:person).order(:order) %>
+  <% if cast.any? %>
+    <div class="cast-block">
+      <b><%= 'Actor'.pluralize(cast.count) + ':' %></b>
+
+        <%= cast.limit(15).map { |credit| credit.person.name }.to_sentence(last_word_connector: ' and ') %>
+        <br>
+      <% if cast.count > 15 %>
+        <span id="remaining-cast" style="display: none;">
+          <%= cast.offset(15).map { |credit| credit.person.name }.to_sentence(last_word_connector: ' and ') %>
+        </span>
+        <button id="toggle-cast-btn" class="toggle-cast-btn">
+          Show <%= cast.count - 15 %> more
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+    // Listen to both DOMContentLoaded AND Turbo events
+    document.addEventListener('DOMContentLoaded', initCastToggle);
+    document.addEventListener('turbo:load', initCastToggle);
+    document.addEventListener('turbo:render', initCastToggle);
+
+    function initCastToggle() {
+        const toggleBtn = document.getElementById('toggle-cast-btn');
+        const remainingCast = document.getElementById('remaining-cast');
+
+        if (toggleBtn && remainingCast) {
+            const totalHidden = parseInt(toggleBtn.dataset.count || <%= cast.count - 15 %>);
+
+            // Remove any existing listeners to prevent duplicates
+            const newToggleBtn = toggleBtn.cloneNode(true);
+            toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+
+            newToggleBtn.addEventListener('click', function () {
+                if (remainingCast.style.display === 'none') {
+                    remainingCast.style.display = 'block';
+                    newToggleBtn.textContent = 'Show less';
+                } else {
+                    remainingCast.style.display = 'none';
+                    newToggleBtn.textContent = `Show ${totalHidden} more`;
+                }
+            });
+        }
+    }
+</script>

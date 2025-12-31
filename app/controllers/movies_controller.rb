@@ -9,13 +9,14 @@ class MoviesController < ApplicationController
   end
 
   def show
+    # @movie = Movie.includes(credits: :person).find(params[:id])
   end
 
   private
 
   # Use callbacks to share common setup or constraints between actions.
   def set_movie
-    @movie = Movie.find(params.expect(:id))
+    @movie = Movie.includes(credits: :person).find(params[:id])
   end
 
   # Only allow a list of trusted parameters through.
@@ -33,6 +34,5 @@ class MoviesController < ApplicationController
     @movie_schedules = schedules_by_date.transform_values do |schedules|
       schedules.group_by { |schedule| schedule.cinema.title }.to_h
     end
-
   end
 end

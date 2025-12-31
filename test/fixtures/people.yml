@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: person_1
+  tmdb_id: 12345
+
+two:
+  name: person_2
+  tmdb_id: 54321
+
+director_one:
+  name: director_one
+  tmdb_id: 123412
+
+actor_one:
+  name: actor_one
+  tmdb_id: 9876

@@ -4,33 +4,11 @@
       <div class="row">
         <div class="col-xl-6 mt-2">
           <%= render @movie %>
+          <%= render 'movie_credits', movie: @movie %>
         </div>
         <div class="col-xl-1"></div>
         <div class="col-xl-5 mt-2">
-          <% @movie_schedules.each do |date, cine| %>
-            <div class="row">
-              <div class="col p-2 mb-2 bg-secondary text-white rounded">
-                <%= date %>
-              </div>
-            </div>
-            <% cine.each do |cinema, v| %>
-              <%= link_to cinema, "/cinemas/" + v[0].cinema_id.to_s %> <br>
-              <% v.each do |k| %>
-                <span>
-                  <%= k.time.in_time_zone("Vienna").strftime("%H:%M") %>
-                </span>
-                <span class="text-secondary small">
-                  <%= k.info %>
-                </span>
-                <% k.tags.each do |tag| %>
-                  <span class="text-secondary small">
-                    <%= link_to tag.name, "/tags/" + tag.id.to_s, class: 'do_not_underline' %>
-                  </span>
-                <% end %>
-              <% end %>
-              <hr>
-            <% end %>
-          <% end %>
+          <%= render 'movie_schedules', movie_schedules: @movie_schedules %>
         </div>
       </div>
       <div class="row mt-3">
@@ -38,3 +16,4 @@
     </div>
   </div>
 </div>
+

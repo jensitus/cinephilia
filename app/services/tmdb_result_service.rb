@@ -1,5 +1,4 @@
 class TmdbResultService < BaseService
-
   TOKEN = Rails.configuration.tmdb_token
 
   attr_reader :url

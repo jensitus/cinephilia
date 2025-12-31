@@ -1,5 +1,4 @@
 module TmdbUtility
-
   TMDB_BASE_URL = "https://api.themoviedb.org/3".freeze
   TMDB_SEARCH_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/search/movie".freeze
   TMDB_MOVIE_ENDPOINT = "#{TMDB_BASE_URL}/movie".freeze
@@ -33,6 +32,7 @@ module TmdbUtility
   def self.fetch_tmdb_id(url, year, movie_query_title, movie_title_json)
     tmdb_results = get_tmdb_results(url)
     return unless tmdb_results
+    return unless tmdb_results["results"]
 
     tmdb_results["results"].each do |tmdb_result|
       presumable_tmdb_id = process_tmdb_result(tmdb_result, movie_query_title, movie_title_json, year)
@@ -40,7 +40,6 @@ module TmdbUtility
     end
 
     nil
-
   end
 
   def self.fallback_tmdb_id(url, movie_query_title, movie_title_json, year, film_at_uri)
@@ -193,5 +192,4 @@ module TmdbUtility
     single_result = tmdb_results["results"].first
     the_other_way_around(single_result["id"], movie_title_json, year, film_at_uri)
   end
-
 end

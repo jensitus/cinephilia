@@ -1,0 +1,14 @@
+# test/fixtures/credits.yml
+
+one:
+  movie: one
+  person: one
+  role: cast
+  character: "Main Hero"
+  order: 1
+
+two:
+  movie: one
+  person: two
+  role: crew
+  job: "Director"

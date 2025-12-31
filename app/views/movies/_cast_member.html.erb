@@ -1,0 +1,7 @@
+<!-- app/views/movies/_cast_member.html.erb -->
+<div class="cast-card">
+  <div class="actor-name"><%= credit.person.name %></div>
+  <% if credit.character.present? %>
+    <div class="character-name"><%= credit.character %></div>
+  <% end %>
+</div>
