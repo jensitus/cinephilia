@@ -1,18 +1,39 @@
 <div id="<%= dom_id cinema %>">
+  <div class="row">
+    <div class="col">
+      <div>
+        <h1><%= cinema.title %></h1>
+      </div>
 
-  <div>
-    <strong>Cinema:</strong>
-    <%= cinema.title %>
+      <div>
+        <strong>county:</strong>
+        <%= cinema.county %>
+      </div>
+
+      <div>
+        <strong>web:</strong>
+        <%= link_to safe_uri(cinema.uri), safe_uri(cinema.uri), target: :_blank unless cinema.uri.nil? %>
+      </div>
+      <% if cinema.street.present? %>
+        <div>
+          <strong>address:</strong>
+          <%= cinema.street %>, <%= cinema.zip %> <%= cinema.city %>
+        </div>
+      <% end %>
+
+      <% if cinema.telephone.present? %>
+        <div>
+          <strong>telephone:</strong>
+          <%= cinema.telephone %>
+        </div>
+      <% end %>
+
+      <% if cinema.email.present? %>
+        <div>
+          <strong>email:</strong>
+          <%= cinema.email %>
+        </div>
+      <% end %>
+    </div>
   </div>
-
-  <div>
-    <strong>County:</strong>
-    <%= cinema.county %>
-  </div>
-
-  <div>
-    <strong>Web:</strong>
-    <%= link_to safe_uri(cinema.uri), safe_uri(cinema.uri), target: :_blank unless cinema.uri.nil? %>
-  </div>
-
 </div>
