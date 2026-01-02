@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_28_063100) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_02_062930) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,6 +21,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_28_063100) do
     t.string "uri"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "street"
+    t.string "city"
+    t.string "zip"
+    t.string "telephone"
+    t.string "email"
     t.index ["cinema_id"], name: "index_cinemas_on_cinema_id", unique: true
   end
 

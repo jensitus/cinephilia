@@ -15,7 +15,7 @@
 
             <% mov.each do |movie_title, schedule| %>
               <div class="row border-bottom p-1">
-                <div class="col-1 p-1">
+                <div class="col-1 p-0">
                   <%= image_tag("https://image.tmdb.org/t/p/w500" + schedule[0].movie.poster_path, width: "100%") unless schedule[0].movie.poster_path == nil %>
                 </div>
                 <div class="col-11">
