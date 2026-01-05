@@ -8,7 +8,7 @@ module Searchable
       language = self == Movie ? "german" : "english"
 
       where("search_vector @@ plainto_tsquery('#{language}', ?)", query)
-        .order(Arel.sql("ts_rank(search_vector, plainto_tsquery('#{language}', '#{sanitize_sql_like(query)}')) DESC"))
+        .order(Arel.sql(sanitize_sql_array("ts_rank(search_vector, plainto_tsquery('#{language}', '#{sanitize_sql_like(query)}')) DESC")))
     }
   end
 
