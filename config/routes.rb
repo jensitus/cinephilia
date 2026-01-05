@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "/search", to: "search#index", as: :search
   resources :tags, only: [ :index, :show ]
   get "/legal", to: "legal#show"
   get "start_page/home"

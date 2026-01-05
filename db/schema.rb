@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_02_062930) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_04_075353) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -26,7 +26,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_02_062930) do
     t.string "zip"
     t.string "telephone"
     t.string "email"
+    t.tsvector "search_vector"
     t.index ["cinema_id"], name: "index_cinemas_on_cinema_id", unique: true
+    t.index ["search_vector"], name: "index_cinemas_on_search_vector", using: :gin
   end
 
   create_table "credits", force: :cascade do |t|
@@ -49,7 +51,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_02_062930) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.tsvector "search_vector"
     t.index ["genre_id"], name: "index_genres_on_genre_id", unique: true
+    t.index ["search_vector"], name: "index_genres_on_search_vector", using: :gin
   end
 
   create_table "genres_movies", id: false, force: :cascade do |t|
@@ -71,7 +75,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_02_062930) do
     t.datetime "updated_at", null: false
     t.string "original_title"
     t.integer "runtime"
+    t.tsvector "search_vector"
     t.index ["movie_id"], name: "index_movies_on_movie_id", unique: true
+    t.index ["search_vector"], name: "index_movies_on_search_vector", using: :gin
   end
 
   create_table "people", force: :cascade do |t|
@@ -79,7 +85,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_02_062930) do
     t.string "tmdb_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.tsvector "search_vector"
     t.index ["name"], name: "index_people_on_name"
+    t.index ["search_vector"], name: "index_people_on_search_vector", using: :gin
     t.index ["tmdb_id"], name: "index_people_on_tmdb_id", unique: true
   end
 

@@ -1,4 +1,5 @@
 class Movie < ApplicationRecord
+  include Searchable
   include TmdbUtility
 
   require "nokogiri"

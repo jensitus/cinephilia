@@ -1,0 +1,177 @@
+<div class="container">
+  <div class="search-page">
+    <h1>Search</h1>
+
+    <%= form_with url: search_path, method: :get, local: true, class: "search-form" do |f| %>
+      <%= f.text_field :q, value: @query, placeholder: "Search movies, cinemas, people...", class: "search-input" %>
+      <%= f.submit "Search", class: "search-button" %>
+    <% end %>
+
+    <% if @query.present? %>
+      <% if @results.values.flatten.any? %>
+
+        <!-- Movies -->
+        <% if @results[:movies].any? %>
+          <div class="search-section">
+            <h2>Movies (<%= @results[:movies].count %>)</h2>
+            <div class="results-list">
+              <% @results[:movies].each do |movie| %>
+                <div class="result-item">
+                  <%= link_to movie_path(movie) do %>
+                    <h3><%= movie.title %></h3>
+                    <% if movie.description.present? %>
+                      <p><%= highlight_search_term(movie.description, @query) %></p>
+                    <% end %>
+                    <% if movie.year.present? %>
+                      <span class="meta"><%= movie.year %></span>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Cinemas -->
+        <% if @results[:cinemas].any? %>
+          <div class="search-section">
+            <h2>Cinemas (<%= @results[:cinemas].count %>)</h2>
+            <div class="results-list">
+              <% @results[:cinemas].each do |cinema| %>
+                <div class="result-item">
+                  <%= link_to cinema_path(cinema) do %>
+                    <h3><%= highlight_search_term(cinema.title, @query) %></h3>
+                    <% if cinema.street.present? %>
+                      <p><%= cinema.street %></p>
+                    <% end %>
+                    <% if cinema.zip.present? %>
+                      <p><%= cinema.zip %>
+                    <% end %>
+                    <% if cinema.city.present? %>
+                      <%= cinema.city %></p>
+                    <% end %>
+                    <% if cinema.telephone.present? %>
+                      <p><%= cinema.telephone %></p>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- People -->
+        <% if @results[:people].any? %>
+          <div class="search-section">
+            <h2>People (<%= @results[:people].count %>)</h2>
+            <div class="results-list">
+              <% @results[:people].each do |person| %>
+                <div class="result-item">
+                  <div class="person-header">
+                    <h3><%= highlight_search_term(person.name, @query) %></h3>
+                    <p class="meta">
+                      <%= person.credits.where(role: 'cast').count %> acting credits,
+                      <%= person.credits.where(role: 'crew', job: 'Director').count %> directing credits
+                    </p>
+                  </div>
+
+                  <!-- Show movies for this person -->
+                  <% movies = person.movies.distinct.limit(5) %>
+                  <% if movies.any? %>
+                    <div class="associated-movies">
+                      <strong>Movies:</strong>
+                      <%= movies.map { |m| link_to(m.title, movie_path(m)) }.join(', ').html_safe %>
+                      <% if person.movies.count > 5 %>
+                        <span class="more">+ <%= person.movies.count - 5 %> more</span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Genres -->
+        <% if @results[:genres].any? %>
+          <div class="search-section">
+            <h2>Genres (<%= @results[:genres].count %>)</h2>
+            <div class="results-list">
+              <% @results[:genres].each do |genre| %>
+                <div class="result-item genre-result">
+                  <div class="genre-header">
+                    <h3><%= genre.name %></h3>
+                    <p class="meta"><%= genre.movies.count %> movies</p>
+                  </div>
+
+                  <!-- Show movies in this genre -->
+                  <% all_movies = genre.movies.order(:title) %>
+                  <% if all_movies.any? %>
+                    <div class="genre-movies">
+                      <ul class="movie-list">
+                        <% all_movies.limit(10).each do |movie| %>
+                          <li>
+                            <%= link_to movie_path(movie) do %>
+                              <span class="movie-title"><%= movie.title %></span>
+                              <% if movie.year.present? %>
+                                <span class="movie-year">(<%= movie.year %>)</span>
+                              <% end %>
+                            <% end %>
+                          </li>
+                        <% end %>
+                      </ul>
+
+                      <% if all_movies.count > 10 %>
+                        <ul class="movie-list remaining-movies" id="remaining-movies-<%= genre.id %>" style="display: none;">
+                          <% all_movies.offset(10).each do |movie| %>
+                            <li>
+                              <%= link_to movie_path(movie) do %>
+                                <span class="movie-title"><%= movie.title %></span>
+                                <% if movie.year.present? %>
+                                  <span class="movie-year">(<%= movie.year %>)</span>
+                                <% end %>
+                              <% end %>
+                            </li>
+                          <% end %>
+                        </ul>
+
+                        <button
+                          class="toggle-movies-btn"
+                          data-genre-id="<%= genre.id %>"
+                          data-count="<%= all_movies.count - 10 %>">
+                          Show <%= all_movies.count - 10 %> more movies
+                        </button>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+      <% else %>
+        <p class="no-results">No results found for "<%= @query %>"</p>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('toggle-movies-btn')) {
+            const btn = e.target;
+            const genreId = btn.dataset.genreId;
+            const hiddenCount = btn.dataset.count;
+            const remaining = document.getElementById(`remaining-movies-${genreId}`);
+
+            if (remaining.style.display === 'none') {
+                remaining.style.display = 'grid';
+                btn.textContent = 'Show less';
+            } else {
+                remaining.style.display = 'none';
+                btn.textContent = `Show ${hiddenCount} more movies`;
+            }
+        }
+    });
+</script>

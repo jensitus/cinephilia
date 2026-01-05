@@ -1,0 +1,278 @@
+/* app/assets/stylesheets/search.css */
+.search-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.search-form {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 8px 10px;
+    margin-top: 2px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+}
+
+.search-button {
+    padding: 8px 20px;
+    background: #dc3578; /*#007bff;*/
+    margin-top: 2px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.search-button:hover {
+    background: #0056b3;
+}
+
+.search-section {
+    margin: 40px 0;
+}
+
+.search-section h2 {
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.result-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.result-item:hover {
+    transform: translateX(5px);
+    background: #e9ecef;
+}
+
+.result-item a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.result-item h3 {
+    margin: 0 0 10px 0;
+    color: #007bff;
+}
+
+.result-item p {
+    margin: 0;
+    color: #666;
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+    font-size: 18px;
+}
+
+.person-header,
+.genre-header {
+    margin-bottom: 15px;
+}
+
+.associated-movies,
+.genre-movies {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.associated-movies {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.associated-movies strong {
+    color: #333;
+    margin-right: 5px;
+}
+
+.associated-movies a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.associated-movies a:hover {
+    text-decoration: underline;
+}
+
+.associated-movies .more {
+    color: #999;
+    font-style: italic;
+    margin-left: 5px;
+}
+
+.genre-movies ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+.genre-movies li {
+    padding: 8px 12px;
+    background: white;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.genre-movies li:hover {
+    background: #e3f2fd;
+}
+
+.genre-movies a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+}
+
+.genre-movies .movie-title {
+    color: #007bff;
+    font-weight: 500;
+}
+
+.genre-movies .movie-year {
+    color: #999;
+    font-size: 0.9em;
+}
+
+.more-movies {
+    margin-top: 15px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.genre-result {
+    background: #fff9e6;
+}
+
+.meta {
+    font-size: 0.9em;
+    color: #999;
+    margin: 5px 0 0 0;
+}
+
+/* app/assets/stylesheets/search.css */
+
+/* ... existing styles ... */
+
+.genre-movies ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+.genre-movies ul.remaining-movies {
+    margin-top: 10px;
+}
+
+.genre-movies li {
+    padding: 8px 12px;
+    background: white;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.genre-movies li:hover {
+    background: #e3f2fd;
+}
+
+.genre-movies a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+}
+
+.genre-movies .movie-title {
+    color: #007bff;
+    font-weight: 500;
+}
+
+.genre-movies .movie-year {
+    color: #999;
+    font-size: 0.9em;
+}
+
+.toggle-movies-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+
+.toggle-movies-btn:hover {
+    background-color: #0056b3;
+}
+
+.toggle-movies-btn:active {
+    transform: scale(0.98);
+}
+
+.genre-result {
+    background: #fff9e6;
+}
+
+.meta {
+    font-size: 0.9em;
+    color: #999;
+    margin: 5px 0 0 0;
+}
+
+mark {
+    background-color: #ffeb3b;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-weight: 600;
+    color: #000;
+}
+
+.result-item a mark {
+    color: #007bff;
+}
+
+.result-item h3 mark {
+    background-color: #ffeb3b;
+    color: #000;
+}
+
+.result-item p mark {
+    background-color: #fff3cd;
+    color: #000;
+}

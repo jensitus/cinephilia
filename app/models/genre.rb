@@ -1,4 +1,6 @@
 class Genre < ApplicationRecord
+  include Searchable
+
   has_and_belongs_to_many :movies
 
   scope :find_or_create_genre, ->(genre) do
