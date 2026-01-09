@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   get "/search", to: "search#index", as: :search
+  get "/search/autocomplete", to: "search#autocomplete", as: :search_autocomplete
   resources :tags, only: [ :index, :show ]
   get "/legal", to: "legal#show"
   get "start_page/home"

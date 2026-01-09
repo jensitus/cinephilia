@@ -9,10 +9,11 @@
     margin: 20px 0;
     display: flex;
     gap: 10px;
+    align-items: flex-start;
 }
 
 .search-input {
-    flex: 1;
+    width: 100%;
     padding: 8px 10px;
     margin-top: 2px;
     font-size: 16px;
@@ -275,4 +276,119 @@ mark {
 .result-item p mark {
     background-color: #fff3cd;
     color: #000;
+}
+
+/* Autocomplete styles */
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: -2px;
+    display: none;
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.autocomplete-item:hover {
+    background: #f8f9fa;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-type {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #007bff;
+    color: white;
+    border-radius: 3px;
+    font-size: 0.7em;
+    font-weight: 700;
+    text-transform: uppercase;
+    min-width: 65px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.autocomplete-type-movie {
+    background: #007bff;
+}
+
+.autocomplete-type-person {
+    background: #28a745;
+}
+
+.autocomplete-type-genre {
+    background: #ffc107;
+    color: #000;
+}
+
+.autocomplete-type-cinema {
+    background: #6f42c1;
+}
+
+.autocomplete-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.autocomplete-title {
+    font-weight: 600;
+    font-size: 1em;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-subtitle {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Keyboard navigation support */
+.autocomplete-item:focus {
+    background: #e9ecef;
+    outline: 2px solid #007bff;
+    outline-offset: -2px;
+}
+
+/* Loading state (optional) */
+.autocomplete-results.loading::after {
+    content: "Searching...";
+    display: block;
+    padding: 12px 15px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
 }

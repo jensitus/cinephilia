@@ -3,7 +3,13 @@
     <h1>Search</h1>
 
     <%= form_with url: search_path, method: :get, local: true, class: "search-form" do |f| %>
-      <%= f.text_field :q, value: @query, placeholder: "Search movies, cinemas, people...", class: "search-input" %>
+      <div class="search-input-wrapper">
+        <%= f.text_field :q, value: @query, placeholder: "Search movies, cinemas, people, genres ...",
+                         class: "search-input", autocomplete: "off", id: "search-input" %>
+
+        <div id="autocomplete-results" class="autocomplete-results"></div>
+      </div>
+
       <%= f.submit "Search", class: "search-button" %>
     <% end %>
 
@@ -18,9 +24,9 @@
               <% @results[:movies].each do |movie| %>
                 <div class="result-item">
                   <%= link_to movie_path(movie) do %>
-                    <h3><%= movie.title %></h3>
+                    <h3><%= highlight_search_term(movie.title, @query) %></h3>
                     <% if movie.description.present? %>
-                      <p><%= highlight_search_term(movie.description, @query) %></p>
+                      <p><%= highlight_search_term(movie.description, @query, length: 150) %></p>
                     <% end %>
                     <% if movie.year.present? %>
                       <span class="meta"><%= movie.year %></span>
@@ -43,15 +49,6 @@
                     <h3><%= highlight_search_term(cinema.title, @query) %></h3>
                     <% if cinema.street.present? %>
                       <p><%= cinema.street %></p>
-                    <% end %>
-                    <% if cinema.zip.present? %>
-                      <p><%= cinema.zip %>
-                    <% end %>
-                    <% if cinema.city.present? %>
-                      <%= cinema.city %></p>
-                    <% end %>
-                    <% if cinema.telephone.present? %>
-                      <p><%= cinema.telephone %></p>
                     <% end %>
                   <% end %>
                 </div>
@@ -100,7 +97,7 @@
               <% @results[:genres].each do |genre| %>
                 <div class="result-item genre-result">
                   <div class="genre-header">
-                    <h3><%= genre.name %></h3>
+                    <h3><%= highlight_search_term(genre.name, @query) %></h3>
                     <p class="meta"><%= genre.movies.count %> movies</p>
                   </div>
 
@@ -135,10 +132,9 @@
                           <% end %>
                         </ul>
 
-                        <button
-                          class="toggle-movies-btn"
-                          data-genre-id="<%= genre.id %>"
-                          data-count="<%= all_movies.count - 10 %>">
+                        <button class="toggle-movies-btn"
+                                data-genre-id="<%= genre.id %>"
+                                data-count="<%= all_movies.count - 10 %>">
                           Show <%= all_movies.count - 10 %> more movies
                         </button>
                       <% end %>
@@ -158,6 +154,83 @@
 </div>
 
 <script>
+    // Autocomplete functionality
+    let debounceTimer;
+    const searchInput = document.getElementById('search-input');
+    const autocompleteResults = document.getElementById('autocomplete-results');
+
+    if (searchInput && autocompleteResults) {
+        searchInput.addEventListener('input', function (e) {
+            const query = e.target.value.trim();
+
+            clearTimeout(debounceTimer);
+
+            if (query.length < 2) {
+                autocompleteResults.style.display = 'none';
+                autocompleteResults.innerHTML = '';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetchAutocomplete(query);
+            }, 300);
+        });
+
+        // Hide on escape key
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+
+        // Hide when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+    }
+
+    function fetchAutocomplete(query) {
+        fetch(`<%= search_autocomplete_path %>?q=${encodeURIComponent(query)}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                displayAutocomplete(data);
+            })
+            .catch(error => {
+                console.error('Autocomplete error:', error);
+            });
+    }
+
+    function displayAutocomplete(data) {
+        if (!data || data.length === 0) {
+            autocompleteResults.style.display = 'none';
+            autocompleteResults.innerHTML = '';
+            return;
+        }
+
+        autocompleteResults.innerHTML = data.map(item => {
+            const subtitle = item.subtitle ? `<div class="autocomplete-subtitle">${item.subtitle}</div>` : '';
+
+            return `
+      <a href="${item.url}" class="autocomplete-item">
+        <span class="autocomplete-type autocomplete-type-${item.type.toLowerCase()}">${item.type}</span>
+        <div class="autocomplete-content">
+          <div class="autocomplete-title">${item.title}</div>
+          ${subtitle}
+        </div>
+      </a>
+    `;
+        }).join('');
+
+        autocompleteResults.style.display = 'block';
+    }
+
+    // Genre toggle functionality (existing)
     document.addEventListener('click', function (e) {
         if (e.target.classList.contains('toggle-movies-btn')) {
             const btn = e.target;
