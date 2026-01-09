@@ -1,0 +1,314 @@
+<div class="container">
+  <div class="search-page">
+    <h1>Search</h1>
+
+    <%= form_with url: search_path, method: :get, local: true, class: "search-form" do |f| %>
+      <div class="search-input-wrapper">
+        <%= f.text_field :q, value: @query, placeholder: "Search movies, cinemas, people, genres ...",
+                         class: "search-input", autocomplete: "off", id: "search-input" %>
+
+        <div id="autocomplete-results" class="autocomplete-results"></div>
+      </div>
+
+      <%= f.submit "Search", class: "search-button" %>
+    <% end %>
+
+    <% if @query.present? %>
+      <% if @results.values.flatten.any? %>
+
+        <!-- Movies -->
+        <% if @results[:movies].any? %>
+          <div class="search-section">
+            <h2>Movies (<%= @results[:movies].count %>)</h2>
+            <div class="results-list">
+              <% @results[:movies].each do |movie| %>
+                <div class="result-item">
+                  <%= link_to movie_path(movie) do %>
+                    <h3><%= highlight_search_term(movie.title, @query) %></h3>
+                    <% if movie.description.present? %>
+                      <p><%= highlight_search_term(movie.description, @query, length: 150) %></p>
+                    <% end %>
+                    <% if movie.year.present? %>
+                      <span class="meta"><%= movie.year %></span>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Cinemas -->
+        <% if @results[:cinemas].any? %>
+          <div class="search-section">
+            <h2>Cinemas (<%= @results[:cinemas].count %>)</h2>
+            <div class="results-list">
+              <% @results[:cinemas].each do |cinema| %>
+                <div class="result-item">
+                  <%= link_to cinema_path(cinema) do %>
+                    <h3><%= highlight_search_term(cinema.title, @query) %></h3>
+                    <% if cinema.street.present? %>
+                      <p><%= cinema.street %></p>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- People -->
+        <% if @results[:people].any? %>
+          <div class="search-section">
+            <h2>People (<%= @results[:people].count %>)</h2>
+            <div class="results-list">
+              <% @results[:people].each do |person| %>
+                <div class="result-item">
+                  <div class="person-header">
+                    <h3><%= highlight_search_term(person.name, @query) %></h3>
+                    <p class="meta">
+                      <%= person.credits.where(role: 'cast').count %> acting credits,
+                      <%= person.credits.where(role: 'crew', job: 'Director').count %> directing credits
+                    </p>
+                  </div>
+
+                  <!-- Show movies for this person -->
+                  <% movies = person.movies.distinct.limit(5) %>
+                  <% if movies.any? %>
+                    <div class="associated-movies">
+                      <strong>Movies:</strong>
+                      <%= movies.map { |m| link_to(m.title, movie_path(m)) }.join(', ').html_safe %>
+                      <% if person.movies.count > 5 %>
+                        <span class="more">+ <%= person.movies.count - 5 %> more</span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Genres -->
+        <% if @results[:genres].any? %>
+          <div class="search-section">
+            <h2>Genres (<%= @results[:genres].count %>)</h2>
+            <div class="results-list">
+              <% @results[:genres].each do |genre| %>
+                <div class="result-item genre-result">
+                  <div class="genre-header">
+                    <h3><%= highlight_search_term(genre.name, @query) %></h3>
+                    <p class="meta"><%= genre.movies.count %> total movies</p>
+                  </div>
+
+                  <% current_movies = genre.currently_showing_movies %>
+                  <% archived_movies = genre.archived_movies %>
+
+                  <!-- Currently Showing Movies -->
+                  <% if current_movies.any? %>
+                    <div class="genre-movies-section">
+                      <h4 class="subsection-title">
+                        <span class="badge badge-success">Currently Showing</span>
+                        (<%= current_movies.count %>)
+                      </h4>
+
+                      <div class="genre-movies">
+                        <ul class="movie-list">
+                          <% current_movies.limit(10).each do |movie| %>
+                            <li class="movie-item-current">
+                              <%= link_to movie_path(movie) do %>
+                                <span class="movie-title"><%= movie.title %></span>
+                                <% if movie.year.present? %>
+                                  <span class="movie-year">(<%= movie.year %>)</span>
+                                <% end %>
+                              <% end %>
+                            </li>
+                          <% end %>
+                        </ul>
+
+                        <% if current_movies.count > 10 %>
+                          <ul class="movie-list remaining-movies" id="remaining-current-movies-<%= genre.id %>" style="display: none;">
+                            <% current_movies.offset(10).each do |movie| %>
+                              <li class="movie-item-current">
+                                <%= link_to movie_path(movie) do %>
+                                  <span class="movie-title"><%= movie.title %></span>
+                                  <% if movie.year.present? %>
+                                    <span class="movie-year">(<%= movie.year %>)</span>
+                                  <% end %>
+                                <% end %>
+                              </li>
+                            <% end %>
+                          </ul>
+
+                          <button
+                            class="toggle-movies-btn"
+                            data-target="remaining-current-movies-<%= genre.id %>"
+                            data-count="<%= current_movies.count - 10 %>">
+                            Show <%= current_movies.count - 10 %> more currently showing
+                          </button>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <!-- Archived/Not Currently Showing Movies -->
+                  <% if archived_movies.any? %>
+                    <div class="genre-movies-section">
+                      <h4 class="subsection-title">
+                        <span class="badge badge-secondary">All Movies</span>
+                        (<%= archived_movies.count %>)
+                      </h4>
+
+                      <div class="genre-movies">
+                        <ul class="movie-list">
+                          <% archived_movies.limit(10).each do |movie| %>
+                            <li>
+                              <%= link_to movie_path(movie) do %>
+                                <span class="movie-title"><%= movie.title %></span>
+                                <% if movie.year.present? %>
+                                  <span class="movie-year">(<%= movie.year %>)</span>
+                                <% end %>
+                              <% end %>
+                            </li>
+                          <% end %>
+                        </ul>
+
+                        <% if archived_movies.count > 10 %>
+                          <ul class="movie-list remaining-movies" id="remaining-archived-movies-<%= genre.id %>" style="display: none;">
+                            <% archived_movies.offset(10).each do |movie| %>
+                              <li>
+                                <%= link_to movie_path(movie) do %>
+                                  <span class="movie-title"><%= movie.title %></span>
+                                  <% if movie.year.present? %>
+                                    <span class="movie-year">(<%= movie.year %>)</span>
+                                  <% end %>
+                                <% end %>
+                              </li>
+                            <% end %>
+                          </ul>
+
+                          <button
+                            class="toggle-movies-btn"
+                            data-target="remaining-archived-movies-<%= genre.id %>"
+                            data-count="<%= archived_movies.count - 10 %>">
+                            Show <%= archived_movies.count - 10 %> more
+                          </button>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+      <% else %>
+        <p class="no-results">No results found for "<%= @query %>"</p>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+    // Autocomplete functionality
+    let debounceTimer;
+    const searchInput = document.getElementById('search-input');
+    const autocompleteResults = document.getElementById('autocomplete-results');
+
+    if (searchInput && autocompleteResults) {
+        searchInput.addEventListener('input', function (e) {
+            const query = e.target.value.trim();
+
+            clearTimeout(debounceTimer);
+
+            if (query.length < 2) {
+                autocompleteResults.style.display = 'none';
+                autocompleteResults.innerHTML = '';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetchAutocomplete(query);
+            }, 300);
+        });
+
+        // Hide on escape key
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+
+        // Hide when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+    }
+
+    function fetchAutocomplete(query) {
+        fetch(`<%= search_autocomplete_path %>?q=${encodeURIComponent(query)}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                displayAutocomplete(data);
+            })
+            .catch(error => {
+                console.error('Autocomplete error:', error);
+            });
+    }
+
+    function displayAutocomplete(data) {
+        if (!data || data.length === 0) {
+            autocompleteResults.style.display = 'none';
+            autocompleteResults.innerHTML = '';
+            return;
+        }
+
+        autocompleteResults.innerHTML = data.map(item => {
+            const subtitle = item.subtitle ? `<div class="autocomplete-subtitle">${item.subtitle}</div>` : '';
+
+            return `
+      <a href="${item.url}" class="autocomplete-item">
+        <span class="autocomplete-type autocomplete-type-${item.type.toLowerCase()}">${item.type}</span>
+        <div class="autocomplete-content">
+          <div class="autocomplete-title">${item.title}</div>
+          ${subtitle}
+        </div>
+      </a>
+    `;
+        }).join('');
+
+        autocompleteResults.style.display = 'block';
+    }
+
+    // Genre toggle functionality (existing)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('toggle-movies-btn')) {
+            const btn = e.target;
+            const targetId = btn.dataset.target;
+            const hiddenCount = btn.dataset.count;
+            const remaining = document.getElementById(targetId);
+
+            if (remaining.style.display === 'none') {
+                remaining.style.display = 'grid';
+                btn.textContent = 'Show less';
+            } else {
+                remaining.style.display = 'none';
+
+                // Determine button text based on section
+                if (targetId.includes('current')) {
+                    btn.textContent = `Show ${hiddenCount} more currently showing`;
+                } else {
+                    btn.textContent = `Show ${hiddenCount} more`;
+                }
+            }
+        }
+    });
+</script>

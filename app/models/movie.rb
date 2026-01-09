@@ -1,4 +1,5 @@
 class Movie < ApplicationRecord
+  include Searchable
   include TmdbUtility
 
   require "nokogiri"
@@ -16,6 +17,20 @@ class Movie < ApplicationRecord
   BASE_MOVIE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/"
   VIENNA = "Wien"
   DAYS_TO_FETCH = 17
+
+  def currently_showing?
+    schedules.where("time >= ?", Date.today).exists?
+  end
+
+  # Scope for currently showing movies
+  scope :currently_showing, -> {
+    joins(:schedules).where("schedules.time >= ?", Date.today)
+                     .distinct
+  }
+
+  scope :not_currently_showing, -> {
+    where.not(id: currently_showing.select(:id))
+  }
 
   def cast_members
     credits.where(role: "cast").includes(:person).order(:order)
