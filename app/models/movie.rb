@@ -18,6 +18,20 @@ class Movie < ApplicationRecord
   VIENNA = "Wien"
   DAYS_TO_FETCH = 17
 
+  def currently_showing?
+    schedules.where("time >= ?", Date.today).exists?
+  end
+
+  # Scope for currently showing movies
+  scope :currently_showing, -> {
+    joins(:schedules).where("schedules.time >= ?", Date.today)
+                     .distinct
+  }
+
+  scope :not_currently_showing, -> {
+    where.not(id: currently_showing.select(:id))
+  }
+
   def cast_members
     credits.where(role: "cast").includes(:person).order(:order)
   end

@@ -392,3 +392,58 @@ mark {
     color: #666;
     font-style: italic;
 }
+
+/* ... existing styles ... */
+
+.genre-movies-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.genre-movies-section:first-child {
+    border-top: none;
+    margin-top: 15px;
+    padding-top: 0;
+}
+
+.subsection-title {
+    font-size: 1em;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+}
+
+.badge-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+/* Highlight currently showing movies */
+.movie-item-current {
+    background: #e8f5e9 !important;
+    border-left: 3px solid #28a745;
+}
+
+.movie-item-current:hover {
+    background: #c8e6c9 !important;
+}
+
+/* ... rest of existing styles ... */

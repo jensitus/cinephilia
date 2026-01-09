@@ -98,29 +98,70 @@
                 <div class="result-item genre-result">
                   <div class="genre-header">
                     <h3><%= highlight_search_term(genre.name, @query) %></h3>
-                    <p class="meta"><%= genre.movies.count %> movies</p>
+                    <p class="meta"><%= genre.movies.count %> total movies</p>
                   </div>
 
-                  <!-- Show movies in this genre -->
-                  <% all_movies = genre.movies.order(:title) %>
-                  <% if all_movies.any? %>
-                    <div class="genre-movies">
-                      <ul class="movie-list">
-                        <% all_movies.limit(10).each do |movie| %>
-                          <li>
-                            <%= link_to movie_path(movie) do %>
-                              <span class="movie-title"><%= movie.title %></span>
-                              <% if movie.year.present? %>
-                                <span class="movie-year">(<%= movie.year %>)</span>
-                              <% end %>
-                            <% end %>
-                          </li>
-                        <% end %>
-                      </ul>
+                  <% current_movies = genre.currently_showing_movies %>
+                  <% archived_movies = genre.archived_movies %>
 
-                      <% if all_movies.count > 10 %>
-                        <ul class="movie-list remaining-movies" id="remaining-movies-<%= genre.id %>" style="display: none;">
-                          <% all_movies.offset(10).each do |movie| %>
+                  <!-- Currently Showing Movies -->
+                  <% if current_movies.any? %>
+                    <div class="genre-movies-section">
+                      <h4 class="subsection-title">
+                        <span class="badge badge-success">Currently Showing</span>
+                        (<%= current_movies.count %>)
+                      </h4>
+
+                      <div class="genre-movies">
+                        <ul class="movie-list">
+                          <% current_movies.limit(10).each do |movie| %>
+                            <li class="movie-item-current">
+                              <%= link_to movie_path(movie) do %>
+                                <span class="movie-title"><%= movie.title %></span>
+                                <% if movie.year.present? %>
+                                  <span class="movie-year">(<%= movie.year %>)</span>
+                                <% end %>
+                              <% end %>
+                            </li>
+                          <% end %>
+                        </ul>
+
+                        <% if current_movies.count > 10 %>
+                          <ul class="movie-list remaining-movies" id="remaining-current-movies-<%= genre.id %>" style="display: none;">
+                            <% current_movies.offset(10).each do |movie| %>
+                              <li class="movie-item-current">
+                                <%= link_to movie_path(movie) do %>
+                                  <span class="movie-title"><%= movie.title %></span>
+                                  <% if movie.year.present? %>
+                                    <span class="movie-year">(<%= movie.year %>)</span>
+                                  <% end %>
+                                <% end %>
+                              </li>
+                            <% end %>
+                          </ul>
+
+                          <button
+                            class="toggle-movies-btn"
+                            data-target="remaining-current-movies-<%= genre.id %>"
+                            data-count="<%= current_movies.count - 10 %>">
+                            Show <%= current_movies.count - 10 %> more currently showing
+                          </button>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <!-- Archived/Not Currently Showing Movies -->
+                  <% if archived_movies.any? %>
+                    <div class="genre-movies-section">
+                      <h4 class="subsection-title">
+                        <span class="badge badge-secondary">All Movies</span>
+                        (<%= archived_movies.count %>)
+                      </h4>
+
+                      <div class="genre-movies">
+                        <ul class="movie-list">
+                          <% archived_movies.limit(10).each do |movie| %>
                             <li>
                               <%= link_to movie_path(movie) do %>
                                 <span class="movie-title"><%= movie.title %></span>
@@ -132,14 +173,31 @@
                           <% end %>
                         </ul>
 
-                        <button class="toggle-movies-btn"
-                                data-genre-id="<%= genre.id %>"
-                                data-count="<%= all_movies.count - 10 %>">
-                          Show <%= all_movies.count - 10 %> more movies
-                        </button>
-                      <% end %>
+                        <% if archived_movies.count > 10 %>
+                          <ul class="movie-list remaining-movies" id="remaining-archived-movies-<%= genre.id %>" style="display: none;">
+                            <% archived_movies.offset(10).each do |movie| %>
+                              <li>
+                                <%= link_to movie_path(movie) do %>
+                                  <span class="movie-title"><%= movie.title %></span>
+                                  <% if movie.year.present? %>
+                                    <span class="movie-year">(<%= movie.year %>)</span>
+                                  <% end %>
+                                <% end %>
+                              </li>
+                            <% end %>
+                          </ul>
+
+                          <button
+                            class="toggle-movies-btn"
+                            data-target="remaining-archived-movies-<%= genre.id %>"
+                            data-count="<%= archived_movies.count - 10 %>">
+                            Show <%= archived_movies.count - 10 %> more
+                          </button>
+                        <% end %>
+                      </div>
                     </div>
                   <% end %>
+
                 </div>
               <% end %>
             </div>
@@ -231,19 +289,25 @@
     }
 
     // Genre toggle functionality (existing)
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
         if (e.target.classList.contains('toggle-movies-btn')) {
             const btn = e.target;
-            const genreId = btn.dataset.genreId;
+            const targetId = btn.dataset.target;
             const hiddenCount = btn.dataset.count;
-            const remaining = document.getElementById(`remaining-movies-${genreId}`);
+            const remaining = document.getElementById(targetId);
 
             if (remaining.style.display === 'none') {
                 remaining.style.display = 'grid';
                 btn.textContent = 'Show less';
             } else {
                 remaining.style.display = 'none';
-                btn.textContent = `Show ${hiddenCount} more movies`;
+
+                // Determine button text based on section
+                if (targetId.includes('current')) {
+                    btn.textContent = `Show ${hiddenCount} more currently showing`;
+                } else {
+                    btn.textContent = `Show ${hiddenCount} more`;
+                }
             }
         }
     });

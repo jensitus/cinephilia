@@ -3,6 +3,14 @@ class SearchController < ApplicationController
     @query = params[:q]
     @search = Search.new(@query)
     @results = @search.results
+
+    if @results[:genres]&.any?
+      @results[:genres] = @results[:genres].includes(movies: :schedules)
+    end
+
+    if @results[:people]&.any?
+      @results[:people] = @results[:people].includes(:movies)
+    end
   end
 
   def autocomplete
