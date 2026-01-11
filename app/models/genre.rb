@@ -7,7 +7,13 @@ class Genre < ApplicationRecord
     return none if query.blank?
 
     where("search_vector @@ plainto_tsquery('german', ?)", query)
-      .order(Arel.sql("ts_rank(search_vector, plainto_tsquery('german', '#{sanitize_sql_like(query)}')) DESC"))
+      .order(
+        Arel.sql(
+          sanitize_sql_array([
+                               "ts_rank(search_vector, plainto_tsquery('german', '#{sanitize_sql_like(query)}')) DESC"
+                             ])
+        )
+      )
   }
 
   def currently_showing_movies
