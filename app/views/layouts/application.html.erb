@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="h-100">
+<html class="h-100" lang="en">
 <head>
   <title><%= content_for(:title) || "Cinephilia" %></title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -27,8 +27,10 @@
   <div class="container-fluid">
     <div class="navbar-text">
       <span style="font-family: 'Baloo Bhaijaan',serif; font-weight: bold; font-size: x-large">
-        <img src="/icon.png" alt="cinephilia" width="35">
-        <%= link_to "Kino Wien", root_url, class: 'do_not_underline' %>
+        <%= link_to root_url, class: 'do_not_underline' do %>
+          <img src="/icon.png" alt="cinephilia" width="35">
+        <% end %>
+        <%= link_to "Kino Wien", root_url, class: 'do_not_underline mobile-hidden' %>
       </span>
       <span class="m-3">
         <%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %>
