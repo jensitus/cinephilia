@@ -10,3 +10,9 @@ body {
     text-decoration: none;
     font-size: small;
 }
+
+@media (max-width: 767px) {
+    .mobile-hidden {
+        display: none;
+    }
+}

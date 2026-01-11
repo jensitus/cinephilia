@@ -1,8 +1,8 @@
+<% content_for :title, "Movies" %>
 <p style="color: green"><%= notice %></p>
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <% content_for :title, "Movies" %>
       <h1>Movies</h1>
       <div id="movies">
         <% @movies_by_letter.each do |letter, movies| %>
