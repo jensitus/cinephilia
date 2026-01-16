@@ -41,6 +41,7 @@ gem "dartsass-rails"
 gem "bootstrap", "~> 5.3.3"
 
 gem "nokogiri"
+gem "httparty"
 
 gem "minitest", "~> 5.25"
 
