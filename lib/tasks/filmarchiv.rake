@@ -77,7 +77,6 @@ namespace :filmarchiv do
     errors = []
 
     screenings.each do |screening_data|
-      puts screening_data.inspect
       begin
         # Find or create movie
         movie = Movie.find_by(title: screening_data[:title])
@@ -163,21 +162,38 @@ namespace :filmarchiv do
       best_match = matcher.find_best_match
 
       if best_match
-        # Fetch director from credits for verification
-        credits = matcher.send(:fetch_movie_credits, best_match["id"])
-        directors = credits&.dig("crew")&.select { |p| p["job"] == "Director" }
-        director_names = directors&.map { |d| d["name"] }&.join(", ")
-          movie.update(
-            tmdb_id: best_match["id"].to_s,
-            description: best_match["overview"].presence || movie.description,
-            poster_path: best_match["poster_path"] ? best_match["poster_path"] : nil,
-            original_title: best_match["original_title"],
-            year: movie.year.presence || best_match["release_date"]&.split("-")&.first
-          )
+        tmdb_id = best_match["id"]
+        # Fetch full movie details (includes genres)
+        movie_details = fetch_tmdb_movie_details(tmdb_id)
+
+        # Fetch credits (cast and crew)
+        credits = fetch_tmdb_credits(tmdb_id)
+
+        # Update movie basic info
+        movie.update(
+          tmdb_id: tmdb_id,
+          description: best_match["overview"].presence || movie.description,
+          poster_path: best_match["poster_path"] ? "https://image.tmdb.org/t/p/w500#{best_match['poster_path']}" : nil,
+          original_title: best_match["original_title"],
+          year: movie.year.presence || best_match["release_date"]&.split("-")&.first,
+          runtime: movie_details&.dig("runtime") || movie.runtime
+        )
+
+        # Add genres
+        if movie_details && movie_details["genres"]
+          add_genres_to_movie(movie, movie_details["genres"])
+        end
+
+        # Add credits (cast and crew)
+        if credits
+          add_credits_to_movie(movie, credits)
+        end
 
         success_count += 1
         puts "✓ Matched to: '#{best_match['title']}' (#{best_match['release_date']&.split('-')&.first})"
-        puts "  TMDB Director(s): #{director_names}" if director_names
+        puts "  Added #{movie.genres.count} genres"
+        puts "  Added #{movie.credits.where(role: 'cast').count} cast members"
+        puts "  Added #{movie.credits.where(role: 'crew').count} crew members"
       else
         no_match_count += 1
         puts "✗ No good match for '#{movie.title}' (#{movie.year})"
@@ -192,6 +208,113 @@ namespace :filmarchiv do
     puts "Successfully matched: #{success_count}"
     puts "No match found: #{no_match_count}"
     puts "=" * 60
+  end
+
+  def fetch_tmdb_movie_details(tmdb_id)
+    url = URI("https://api.themoviedb.org/3/movie/#{tmdb_id}")
+    url.query = URI.encode_www_form({
+                                      language: "de-DE"
+                                    })
+
+    TmdbResultService.new(url).call
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch movie details for TMDB ID #{tmdb_id}: #{e.message}"
+    nil
+  end
+
+  def fetch_tmdb_credits(tmdb_id)
+    url = URI("https://api.themoviedb.org/3/movie/#{tmdb_id}/credits")
+    url.query = URI.encode_www_form({
+                                      language: "de-DE"
+                                    })
+
+    TmdbResultService.new(url).call
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch credits for TMDB ID #{tmdb_id}: #{e.message}"
+    nil
+  end
+
+  def add_genres_to_movie(movie, tmdb_genres)
+    tmdb_genres.each do |genre_data|
+      # Find or create genre
+      genre = Genre.find_or_create_by!(genre_id: "g-#{genre_data['id']}") do |g|
+        g.name = genre_data["name"]
+      end
+
+      # Associate with movie (avoid duplicates)
+      movie.genres << genre unless movie.genres.include?(genre)
+    end
+  rescue StandardError => e
+    Rails.logger.error "Failed to add genres for movie #{movie.title}: #{e.message}"
+  end
+
+  def add_credits_to_movie(movie, credits_data)
+    # Add cast (limit to top 15 to avoid too much data)
+    if credits_data["cast"]
+      credits_data["cast"].first(15).each do |cast_member|
+        add_cast_member(movie, cast_member)
+      end
+    end
+
+    # Add crew (directors, writers, producers, cinematographers)
+    if credits_data["crew"]
+      important_jobs = [ "Director", "Writer", "Screenplay", "Producer", "Director of Photography", "Original Music Composer" ]
+
+      credits_data["crew"].each do |crew_member|
+        if important_jobs.include?(crew_member["job"])
+          add_crew_member(movie, crew_member)
+        end
+      end
+    end
+  rescue StandardError => e
+    Rails.logger.error "Failed to add credits for movie #{movie.title}: #{e.message}"
+  end
+
+  def add_cast_member(movie, cast_data)
+    # Find or create person
+    person = Person.find_or_create_by!(tmdb_id: cast_data["id"].to_s) do |p|
+      p.name = cast_data["name"]
+    end
+
+    # Update name if changed
+    person.update(name: cast_data["name"]) if person.name != cast_data["name"]
+
+    # Create credit
+    Credit.find_or_create_by!(
+      movie: movie,
+      person: person,
+      role: "cast",
+      character: cast_data["character"],
+      order: cast_data["order"]
+    )
+  rescue ActiveRecord::RecordInvalid => e
+    # Skip duplicate credits
+    Rails.logger.debug "Skipped duplicate cast credit: #{e.message}"
+  rescue StandardError => e
+    Rails.logger.error "Failed to add cast member #{cast_data['name']}: #{e.message}"
+  end
+
+  def add_crew_member(movie, crew_data)
+    # Find or create person
+    person = Person.find_or_create_by!(tmdb_id: crew_data["id"].to_s) do |p|
+      p.name = crew_data["name"]
+    end
+
+    # Update name if changed
+    person.update(name: crew_data["name"]) if person.name != crew_data["name"]
+
+    # Create credit
+    Credit.find_or_create_by!(
+      movie: movie,
+      person: person,
+      role: "crew",
+      job: crew_data["job"]
+    )
+  rescue ActiveRecord::RecordInvalid => e
+    # Skip duplicate credits
+    Rails.logger.debug "Skipped duplicate crew credit: #{e.message}"
+  rescue StandardError => e
+    Rails.logger.error "Failed to add crew member #{crew_data['name']}: #{e.message}"
   end
 
   desc "Test film detail extraction"
