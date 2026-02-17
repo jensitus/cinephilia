@@ -28,6 +28,17 @@ class Movie < ApplicationRecord
                      .distinct
   }
 
+  def self.movies_with_cinemas_for_startpage(cinema_titles)
+    Movie.distinct
+         .joins(schedules: :cinema)
+         .where(cinemas: { title: cinema_titles })
+         .includes(:cinemas)
+         .map do |movie|
+           cinema_names = movie.cinemas.where(title: cinema_titles).distinct.pluck(:title)
+           { movie: movie, cinemas: cinema_names }
+         end
+  end
+
   scope :not_currently_showing, -> {
     where.not(id: currently_showing.select(:id))
   }

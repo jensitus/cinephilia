@@ -18,31 +18,31 @@
 
     </div>
     <div class="col-md-8">
-      <% @movie_hash.each do |key, value| %>
-        <div class="row mb-1">
-          <div class="col p-2 m-2 bg-secondary text-white rounded">
-            <b><%= key %></b>
-          </div>
-        </div>
+      <div class="row mb-4">
+        <h2><%= @heading %></h2>
+        <% @movies_with_cinemas.each do |item| %>
 
-        <div class="row mb-4">
-          <% value.each do |v| %>
-
-            <div class="col-md-4 mb-3">
+          <div class="col-md-4 mt-4 mb-3">
+            <!-- div class="d-flex"-->
+            <div>
+              <%= image_tag("https://image.tmdb.org/t/p/w500" + item[:movie].poster_path, width: "80", class: "float-start me-3") unless item[:movie].poster_path.nil? %>
+            </div>
+            <div>
               <div>
-                <%= image_tag("https://image.tmdb.org/t/p/w500" + v.poster_path, width: "80", class: "float-start me-3") unless v.poster_path.nil? %>
+                <%= link_to item[:movie].title, "/movies/" + item[:movie].id.to_s %>
+              </div>
+              <div class="text-muted small mb-2">
+                <%= item[:cinemas].join(", ") %>
               </div>
               <div>
-                <%= link_to v.title, "/movies/" + v.id.to_s %>
-              </div>
-              <div>
-                <%= truncate_and_link(v.description, length: 150, url: "/movies/" + v.id.to_s) %>
+                <%= truncate_and_link(item[:movie].description, length: 150, url: "/movies/" + item[:movie].id.to_s) %>
               </div>
             </div>
+            <!-- /div -->
+          </div>
 
-          <% end %>
-        </div>
-      <% end %>
+        <% end %>
+      </div>
     </div>
 
   </div>
