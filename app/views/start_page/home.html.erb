@@ -18,8 +18,10 @@
 
     </div>
     <div class="col-md-8">
+      <div class="col p-2 mt-3 bg-light text-secondary rounded">
+        <%= @heading %>
+      </div>
       <div class="row mb-4">
-        <h2><%= @heading %></h2>
         <% @movies_with_cinemas.each do |item| %>
 
           <div class="col-md-4 mt-4 mb-3">

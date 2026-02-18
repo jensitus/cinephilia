@@ -9,7 +9,7 @@ class SearchController < ApplicationController
     end
 
     if @results[:people]&.any?
-      @results[:people] = @results[:people].includes(:movies)
+      @results[:people] = @results[:people].includes(:movies, :credits)
     end
   end
 
@@ -23,7 +23,6 @@ class SearchController < ApplicationController
 
     results = []
 
-    # Get top results from each category
     Movie.search(query).limit(3).each do |movie|
       results << {
         type: "Movie",
@@ -33,21 +32,23 @@ class SearchController < ApplicationController
       }
     end
 
-    Person.search(query).limit(3).each do |person|
+    Person.search(query).includes(:credits).limit(3).each do |person|
+      acting_count = person.credits.count { |c| c.role == "cast" }
+      directing_count = person.credits.count { |c| c.role == "crew" && c.job == "Director" }
       results << {
         type: "Person",
         title: person.name,
-        subtitle: "#{person.credits.where(role: 'cast').count} acting, #{person.credits.where(role: 'crew', job: 'Director').count} directing",
-        url: search_path(q: person.name) # Link to search results
+        subtitle: "#{acting_count} acting, #{directing_count} directing",
+        url: search_path(q: person.name)
       }
     end
 
-    Genre.search(query).limit(2).each do |genre|
+    Genre.search(query).includes(:movies).limit(2).each do |genre|
       results << {
         type: "Genre",
         title: genre.name,
-        subtitle: "#{genre.movies.count} movies",
-        url: search_path(q: genre.name) # Link to search results
+        subtitle: "#{genre.movies.size} movies",
+        url: search_path(q: genre.name)
       }
     end
 
@@ -55,7 +56,7 @@ class SearchController < ApplicationController
       results << {
         type: "Cinema",
         title: cinema.title,
-        subtitle: cinema.street ? cinema.street : nil,
+        subtitle: cinema.street.presence,
         url: cinema_path(cinema)
       }
     end

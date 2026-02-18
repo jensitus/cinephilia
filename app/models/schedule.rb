@@ -3,12 +3,16 @@ class Schedule < ApplicationRecord
   belongs_to :cinema
   has_and_belongs_to_many :tags
 
+  validates :time, :movie_id, :cinema_id, :schedule_id, presence: true
+
   scope :movie_id, ->(mov_id) { where movie_id: mov_id }
   scope :cinema_id, ->(cinema_id) { where cinema_id: cinema_id }
   scope :time, ->(time) { where time: time }
+  scope :past, -> { where("time < ?", Date.today) }
+  scope :orphaned, -> { left_outer_joins(:movie).where(movie: { id: nil }) }
 
-  scope :create_schedule, ->(screening, movie_id, cinema_id) do
-    schedule_id = "s-" + movie_id.to_s + "-" + cinema_id.to_s + "-" + screening["time"]
+  def self.create_schedule(screening, movie_id, cinema_id)
+    schedule_id = "s-#{movie_id}-#{cinema_id}-#{screening['time']}"
     result = insert(
       {
         time: screening["time"],
@@ -19,34 +23,34 @@ class Schedule < ApplicationRecord
         cinema_id: cinema_id,
         schedule_id: schedule_id
       },
-      unique_by: "index_schedules_on_time_and_movie_id_and_cinema_id")
+      unique_by: "index_schedules_on_time_and_movie_id_and_cinema_id"
+    )
 
     if result.rows.empty?
       Rails.logger.info("Schedule already exists")
     else
       Rails.logger.info(result.inspect)
     end
-    schedule = find_by(schedule_id: schedule_id)
-    schedule
+
+    find_by(schedule_id: schedule_id)
   end
 
-  scope :delete_old_schedules, ->(date) do
-    schedules_to_delete = where("time < ?", Date.today)
-    schedules_to_delete.destroy_all unless schedules_to_delete.empty?
+  def self.delete_old_schedules(_date = nil)
+    past.destroy_all
   end
 
-  scope :delete_schedules_without_movies, -> do
-    left_outer_joins(:movie).where(movie: { id: nil }).find_each(&:destroy)
+  def self.delete_schedules_without_movies
+    orphaned.find_each(&:destroy)
   end
 
-  scope :create_schedules_with_tags, ->(screenings, movie_id, cinema_id) do
+  def self.create_schedules_with_tags(screenings, movie_id, cinema_id)
     screenings.each do |screening|
       schedule = create_schedule(screening, movie_id, cinema_id)
       associate_tags_with_schedule(screening["tags"], schedule) if screening["tags"]
     end
   end
 
-  scope :associate_tags_with_schedule, ->(tags, schedule) do
+  def self.associate_tags_with_schedule(tags, schedule)
     return unless schedule
 
     tags.each do |tag_name|
