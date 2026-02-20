@@ -1,6 +1,6 @@
 class TagsController < ApplicationController
-  before_action :set_tag, only: [:show]
-  before_action :set_movie_schedules, only: [:show]
+  before_action :set_tag, only: [ :show ]
+  before_action :set_movie_schedules, only: [ :show ]
 
   def index
     @tags = Tag.joins(schedules: :cinema)

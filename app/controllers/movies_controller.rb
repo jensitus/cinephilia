@@ -1,6 +1,6 @@
 class MoviesController < ApplicationController
-  before_action :set_movie, only: [:show]
-  before_action :set_movie_schedules, only: [:show]
+  before_action :set_movie, only: [ :show ]
+  before_action :set_movie_schedules, only: [ :show ]
 
   def index
     movies = Movie.in_county(current_county).order(title: :asc)
@@ -18,7 +18,7 @@ class MoviesController < ApplicationController
   end
 
   def movie_params
-    params.expect(movie: [:movie_id, :title, :description])
+    params.expect(movie: [ :movie_id, :title, :description ])
   end
 
   def set_movie_schedules

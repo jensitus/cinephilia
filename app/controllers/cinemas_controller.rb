@@ -16,7 +16,7 @@ class CinemasController < ApplicationController
   end
 
   def cinema_params
-    params.expect(cinema: [:cinema_id, :title, :county, :uri])
+    params.expect(cinema: [ :cinema_id, :title, :county, :uri ])
   end
 
   def set_cinema_schedules
