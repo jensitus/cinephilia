@@ -62,11 +62,11 @@ class Movie < ApplicationRecord
   def self.set_date
     current_date = Date.today
     end_date = Date.today + Cinephilia::Config::DAYS_TO_FETCH
-    # fetch_movies_for_date_range(current_date, end_date)
+    fetch_movies_for_date_range(current_date, end_date)
     Crawlers::WulfeniaKinoCrawlerService.call
     Crawlers::CineplexxSpittalCrawlerService.call
-    # Schedule.delete_old_schedules(current_date)
-    # Schedule.delete_schedules_without_movies
+    Schedule.delete_old_schedules(current_date)
+    Schedule.delete_schedules_without_movies
   end
 
   def self.delete_movies_without_schedules
