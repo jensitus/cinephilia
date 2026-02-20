@@ -15,4 +15,8 @@ body {
     .mobile-hidden {
         display: none;
     }
+
+    body {
+        margin-top: 70px;
+    }
 }

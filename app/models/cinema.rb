@@ -6,6 +6,8 @@ class Cinema < ApplicationRecord
 
   validates :cinema_id, :title, :county, presence: true
 
+  scope :in_county, ->(county) { where(county: county) }
+
   def self.get_random_movie_for_start_page(cinema)
     Movie.distinct.joins(schedules: :cinema)
          .where(cinemas: { title: [cinema] })
@@ -14,8 +16,6 @@ class Cinema < ApplicationRecord
 
   def self.process_cinemas_and_schedules(movie_json, movie_id)
     movie_json["nestedResults"].each do |nested_result|
-      next unless nested_result["parent"]["county"] == Cinephilia::Config::VIENNA
-
       cinema = find_or_create_cinema(nested_result["parent"])
       Schedule.create_schedules_with_tags(nested_result["screenings"], movie_id, cinema.id)
     end

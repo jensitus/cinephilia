@@ -3,7 +3,9 @@ class TagsController < ApplicationController
   before_action :set_movie_schedules, only: [:show]
 
   def index
-    @tags = Tag.with_schedules
+    @tags = Tag.joins(schedules: :cinema)
+               .where(cinemas: { county: current_county })
+               .distinct
   end
 
   def show
@@ -17,6 +19,7 @@ class TagsController < ApplicationController
 
   def set_movie_schedules
     schedules_by_date = @tag.schedules
+                            .in_county(current_county)
                             .includes(:cinema, :movie)
                             .order(:time)
                             .group_by { |schedule| schedule.time.strftime("%d.%m.") }

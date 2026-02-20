@@ -10,6 +10,7 @@ class Schedule < ApplicationRecord
   scope :time, ->(time) { where time: time }
   scope :past, -> { where("time < ?", Date.today) }
   scope :orphaned, -> { left_outer_joins(:movie).where(movie: { id: nil }) }
+  scope :in_county, ->(county) { joins(:cinema).where(cinemas: { county: county }) }
 
   def self.create_schedule(screening, movie_id, cinema_id)
     schedule_id = "s-#{movie_id}-#{cinema_id}-#{screening['time']}"

@@ -30,16 +30,28 @@
         <%= link_to root_url, class: 'do_not_underline' do %>
           <img src="/icon.png" alt="cinephilia" width="35">
         <% end %>
-        <%= link_to "Kino Wien", root_url, class: 'do_not_underline mobile-hidden' %>
+        <%= link_to "Kino #{current_county}", root_url, class: 'do_not_underline mobile-hidden' %>
       </span>
-      <span class="m-3">
+      <span class="m-3 mobile-hidden">
         <%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %>
       </span>
-      <span class="m-2">
+      <span class="m-2 mobile-hidden">
         <%= link_to "Movies", "/movies", class: 'do_not_underline' %>
       </span>
       <span class="m-2">
         <%= link_to "Search", "/search", class: 'do_not_underline' %>
+      </span>
+      <span class="dropdown m-2" data-controller="dropdown">
+        <a class="dropdown-toggle do_not_underline" href="#" role="button" data-action="click->dropdown#toggle">
+          <%= current_county %>
+        </a>
+        <ul class="dropdown-menu" data-dropdown-target="menu">
+          <% available_counties.each do |county| %>
+            <li>
+              <%= link_to county, url_for(county: county), class: "dropdown-item #{'active' if county == current_county}" %>
+            </li>
+          <% end %>
+        </ul>
       </span>
     </div>
 
@@ -51,9 +63,9 @@
     <div class="row align-items-center">
       <div class="col-md-6">
         <div class="footer-brand"><b>cinephilia.at</b></div>
-        <p class="footer-text">Vienna's most famous cinema programme</p>
+        <p class="footer-text">Austria's cinema programme</p>
         <div class="copyright text-left">
-          © 2025 cinephilia.at
+          &copy; 2025 cinephilia.at
         </div>
       </div>
 
