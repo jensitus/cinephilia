@@ -1,5 +1,4 @@
 require "net/http"
-require "openssl"
 
 module Crawlers
   class WulfeniaKinoCrawlerService < BaseCrawlerService
@@ -27,7 +26,6 @@ module Crawlers
       uri = URI.parse(PROGRAMME_URL)
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       http.get(uri.path).body
     rescue StandardError => e
       Rails.logger.error "#{self.class.name}: fetch failed - #{e.message}"
