@@ -23,7 +23,7 @@ class SearchController < ApplicationController
 
     results = []
 
-    Movie.search(query).limit(3).each do |movie|
+    Movie.search(query).in_county(current_county).limit(3).each do |movie|
       results << {
         type: "Movie",
         title: movie.title,
@@ -52,7 +52,7 @@ class SearchController < ApplicationController
       }
     end
 
-    Cinema.search(query).limit(2).each do |cinema|
+    Cinema.search(query).in_county(current_county).limit(2).each do |cinema|
       results << {
         type: "Cinema",
         title: cinema.title,

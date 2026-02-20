@@ -28,6 +28,10 @@ class Movie < ApplicationRecord
     left_outer_joins(:schedules).where(schedules: { id: nil })
   }
 
+  scope :in_county, ->(county) {
+    joins(schedules: :cinema).where(cinemas: { county: county }).distinct
+  }
+
   def currently_showing?
     schedules.where("time >= ?", Date.today).exists?
   end
@@ -58,9 +62,11 @@ class Movie < ApplicationRecord
   def self.set_date
     current_date = Date.today
     end_date = Date.today + Cinephilia::Config::DAYS_TO_FETCH
-    fetch_movies_for_date_range(current_date, end_date)
-    Schedule.delete_old_schedules(current_date)
-    Schedule.delete_schedules_without_movies
+    # fetch_movies_for_date_range(current_date, end_date)
+    Crawlers::WulfeniaKinoCrawlerService.call
+    Crawlers::CineplexxSpittalCrawlerService.call
+    # Schedule.delete_old_schedules(current_date)
+    # Schedule.delete_schedules_without_movies
   end
 
   def self.delete_movies_without_schedules
@@ -85,8 +91,6 @@ class Movie < ApplicationRecord
   end
 
   def self.process_movie_data(movie_data)
-    return unless movie_belongs_to_vienna?(movie_data)
-
     film_at_uri = movie_data["parent"]["uri"].gsub("/filmat", "")
     movie_string_id = create_movie_id(movie_data["parent"]["title"])
 
@@ -102,10 +106,6 @@ class Movie < ApplicationRecord
       genre = Genre.find_or_create_genre(genre_name)
       movie.genres << genre unless movie.genres.include?(genre)
     end
-  end
-
-  def self.movie_belongs_to_vienna?(movie_data)
-    movie_data["nestedResults"].any? { |nested| nested["parent"]["county"] == Cinephilia::Config::VIENNA }
   end
 
   def self.fetch_and_parse_movies(url)

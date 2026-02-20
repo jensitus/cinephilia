@@ -3,7 +3,7 @@ class CinemasController < ApplicationController
   before_action :set_cinema_schedules, only: %i[show]
 
   def index
-    @cinemas = Cinema.all
+    @cinemas = Cinema.in_county(current_county)
   end
 
   def show
@@ -16,7 +16,7 @@ class CinemasController < ApplicationController
   end
 
   def cinema_params
-    params.expect(cinema: [:cinema_id, :title, :county, :uri])
+    params.expect(cinema: [ :cinema_id, :title, :county, :uri ])
   end
 
   def set_cinema_schedules
