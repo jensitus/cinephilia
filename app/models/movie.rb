@@ -17,7 +17,7 @@ class Movie < ApplicationRecord
   validates :movie_id, :title, presence: true
 
   scope :currently_showing, -> {
-    joins(:schedules).where("schedules.time >= ?", Date.today).distinct
+    where("EXISTS (SELECT 1 FROM schedules WHERE schedules.movie_id = movies.id AND schedules.time >= ?)", Date.today)
   }
 
   scope :not_currently_showing, -> {

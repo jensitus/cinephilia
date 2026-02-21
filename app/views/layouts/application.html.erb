@@ -27,19 +27,19 @@
   <div class="container-fluid">
     <div class="navbar-text">
       <span style="font-family: 'Baloo Bhaijaan',serif; font-weight: bold; font-size: x-large">
-        <%= link_to root_url, class: 'do_not_underline' do %>
+        <%= link_to root_url(county: county_param), class: 'do_not_underline' do %>
           <img src="/icon.png" alt="cinephilia" width="35">
         <% end %>
-        <%= link_to "Kino #{current_county}", root_url, class: 'do_not_underline mobile-hidden' %>
+        <%= link_to "Kino #{current_county}", root_url(county: county_param), class: 'do_not_underline mobile-hidden' %>
       </span>
       <span class="m-3 mobile-hidden">
-        <%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %>
+        <%= link_to "Cinemas", cinemas_path(county: county_param), class: 'do_not_underline' %>
       </span>
       <span class="m-2 mobile-hidden">
-        <%= link_to "Movies", "/movies", class: 'do_not_underline' %>
+        <%= link_to "Movies", movies_path(county: county_param), class: 'do_not_underline' %>
       </span>
       <span class="m-2">
-        <%= link_to "Search", "/search", class: 'do_not_underline' %>
+        <%= link_to "Search", search_path(county: county_param), class: 'do_not_underline' %>
       </span>
       <span class="dropdown m-2" data-controller="dropdown">
         <a class="dropdown-toggle do_not_underline" href="#" role="button" data-action="click->dropdown#toggle">
@@ -71,9 +71,9 @@
 
       <div class="col-md-6 text-md-start mt-5">
         <ul class="footer-links">
-          <li><small><%= link_to "Search", "/search", class: 'do_not_underline' %></small></li>
-          <li><small><%= link_to "Cinemas", "/cinemas", class: 'do_not_underline' %></small></li>
-          <li><small><%= link_to "Movies", "/movies", class: 'do_not_underline' %></small></li>
+          <li><small><%= link_to "Search", search_path(county: county_param), class: 'do_not_underline' %></small></li>
+          <li><small><%= link_to "Cinemas", cinemas_path(county: county_param), class: 'do_not_underline' %></small></li>
+          <li><small><%= link_to "Movies", movies_path(county: county_param), class: 'do_not_underline' %></small></li>
           <li><small><%= link_to "Legal", "/legal", class: 'do_not_underline' %></small></li>
         </ul>
       </div>

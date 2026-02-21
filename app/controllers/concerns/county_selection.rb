@@ -2,7 +2,7 @@ module CountySelection
   extend ActiveSupport::Concern
 
   included do
-    helper_method :current_county, :available_counties
+    helper_method :current_county, :available_counties, :county_param
     before_action :set_county_cookie
   end
 
@@ -17,6 +17,10 @@ module CountySelection
     Cinephilia::Config::COUNTIES
   end
 
+  def county_param
+    current_county unless current_county == Cinephilia::Config::DEFAULT_COUNTY
+  end
+
   private
 
   def set_county_cookie
@@ -26,11 +30,6 @@ module CountySelection
         expires: 1.year.from_now,
         httponly: true
       }
-      redirect_to_without_county_param if request.get?
     end
-  end
-
-  def redirect_to_without_county_param
-    redirect_to request.path, status: :see_other
   end
 end
