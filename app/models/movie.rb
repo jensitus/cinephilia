@@ -65,6 +65,7 @@ class Movie < ApplicationRecord
     fetch_movies_for_date_range(current_date, end_date)
     Crawlers::WulfeniaKinoCrawlerService.call
     Crawlers::CineplexxSpittalCrawlerService.call
+    Crawlers::CinepointCrawlerService.call
     Schedule.delete_old_schedules(current_date)
     Schedule.delete_schedules_without_movies
   end
