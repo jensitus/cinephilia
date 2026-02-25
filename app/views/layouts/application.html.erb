@@ -82,5 +82,14 @@
 </footer>
 
 
+
+<div class="cookie-banner d-none" data-controller="cookie-consent">
+  <p class="mb-0">
+    We use a cookie to remember your selected region. By continuing to use this site, you agree to our use of cookies.
+    <%= link_to "Legal", "/legal", class: "cookie-banner-link" %>
+  </p>
+  <button class="btn btn-sm btn-warning ms-3" data-action="click->cookie-consent#accept">OK</button>
+</div>
+
 </body>
 </html>

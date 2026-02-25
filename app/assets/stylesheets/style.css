@@ -11,6 +11,27 @@ body {
     font-size: small;
 }
 
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #212529;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    z-index: 1050;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.cookie-banner-link {
+    color: #ffc107;
+    text-decoration: underline;
+}
+
 @media (max-width: 767px) {
     .mobile-hidden {
         display: none;
