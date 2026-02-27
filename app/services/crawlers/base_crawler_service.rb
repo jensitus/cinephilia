@@ -1,5 +1,13 @@
 module Crawlers
   class BaseCrawlerService < BaseService
+    def self.all_crawlers
+      Dir[Rails.root.join("app/services/crawlers/*_crawler_service.rb")].each do |file|
+        class_name = "Crawlers::#{File.basename(file, ".rb").camelize}"
+        class_name.constantize unless class_name == "Crawlers::BaseCrawlerService"
+      end
+      subclasses
+    end
+
     private
 
     def find_or_create_cinema(id:, title:, county:, url:)
@@ -33,10 +41,20 @@ module Crawlers
       tmdb_id = TmdbUtility.fetch_tmdb_id(tmdb_url, year, query_string, display_title)
       return tmdb_id if tmdb_id
 
-      Tmdb::MovieMatcher.new(
+      tmdb_id = Tmdb::MovieMatcher.new(
         original_title: original_title,
         display_title: display_title,
         year: year,
+        film_at_uri: nil
+      ).find_tmdb_id
+      return tmdb_id if tmdb_id
+
+      # Fallback for classic films re-screened years after release: retry without year constraint
+      return nil if year == "0"
+      Tmdb::MovieMatcher.new(
+        original_title: original_title,
+        display_title: display_title,
+        year: "0",
         film_at_uri: nil
       ).find_tmdb_id
     end
