@@ -62,10 +62,19 @@ class Movie < ApplicationRecord
   def self.set_date
     current_date = Date.today
     end_date = Date.today + Cinephilia::Config::DAYS_TO_FETCH
-    fetch_movies_for_date_range(current_date, end_date)
-    Crawlers::WulfeniaKinoCrawlerService.call
-    Crawlers::CineplexxSpittalCrawlerService.call
-    Crawlers::CinepointCrawlerService.call
+    # fetch_movies_for_date_range(current_date, end_date)
+    failures = []
+    crawlers = Crawlers::BaseCrawlerService.all_crawlers
+    crawlers.each do |crawler|
+      Rails.logger.info "Running #{crawler.name}..."
+      crawler.call
+    rescue StandardError => e
+      backtrace = e.backtrace&.first(5) || []
+      Rails.logger.error "#{crawler.name} failed: #{e.message}\n#{backtrace.join("\n")}"
+      failures << { crawler: crawler.name, error: e.message, backtrace: backtrace }
+    end
+    CrawlerRun.create!(ran_at: Time.current, crawler_count: crawlers.size, failures: failures)
+    CrawlerMailer.failure_report(failures).deliver_now if failures.any?
     Schedule.delete_old_schedules(current_date)
     Schedule.delete_schedules_without_movies
   end

@@ -65,6 +65,7 @@ module TmdbUtility
   end
 
   def self.release_year_valid?(tmdb_release_year, year)
+    return true if year == "0"
     (year.to_i - 1..year.to_i + 1).include?(tmdb_release_year)
   end
 end

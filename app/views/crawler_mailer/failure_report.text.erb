@@ -1,0 +1,10 @@
+Crawler failure report
+Run at: <%= @ran_at.strftime('%d.%m.%Y %H:%M:%S') %>
+<%= @failures.size %> crawler(s) failed:
+
+<% @failures.each do |f| %>
+---
+<%= f[:crawler] %>
+Error: <%= f[:error] %>
+<%= f[:backtrace].join("\n") %>
+<% end %>

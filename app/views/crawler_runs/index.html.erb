@@ -1,0 +1,104 @@
+<% content_for :title, "Crawler Dashboard" %>
+
+<div class="container mt-5 pt-4">
+  <h2 class="mb-1">Crawler Dashboard</h2>
+  <p class="text-muted mb-4">Last <%= @runs.size %> runs</p>
+
+  <% if @runs.empty? %>
+    <p class="text-muted">No crawler runs recorded yet.</p>
+  <% else %>
+    <%
+      total     = @runs.size
+      failed    = @runs.count(&:failed?)
+      succeeded = total - failed
+      last_run  = @runs.first
+    %>
+
+    <div class="row g-3 mb-4">
+      <div class="col-sm-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="fs-3 fw-bold"><%= total %></div>
+            <div class="text-muted small">Runs recorded</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card text-center border-success">
+          <div class="card-body">
+            <div class="fs-3 fw-bold text-success"><%= succeeded %></div>
+            <div class="text-muted small">Successful</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card text-center <%= failed > 0 ? 'border-danger' : '' %>">
+          <div class="card-body">
+            <div class="fs-3 fw-bold <%= failed > 0 ? 'text-danger' : 'text-muted' %>"><%= failed %></div>
+            <div class="text-muted small">With failures</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <strong>Last run:</strong>
+      <%= last_run.ran_at.strftime("%d.%m.%Y %H:%M") %>
+      <% if last_run.success? %>
+        <span class="badge bg-success ms-2">OK</span>
+      <% else %>
+        <span class="badge bg-danger ms-2"><%= last_run.failures.size %> failure(s)</span>
+      <% end %>
+    </div>
+
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Run at</th>
+          <th>Crawlers</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @runs.each do |run| %>
+          <tr class="<%= run.failed? ? 'table-danger' : 'table-success' %>">
+            <td><%= run.ran_at.strftime("%d.%m.%Y %H:%M") %></td>
+            <td><%= run.crawler_count %></td>
+            <td>
+              <% if run.success? %>
+                <span class="badge bg-success">OK</span>
+              <% else %>
+                <span class="badge bg-danger"><%= run.failures.size %> failed</span>
+              <% end %>
+            </td>
+            <td>
+              <% if run.failed? %>
+                <a class="btn btn-sm btn-outline-danger"
+                   data-bs-toggle="collapse"
+                   href="#run-<%= run.id %>">
+                  Details
+                </a>
+              <% end %>
+            </td>
+          </tr>
+          <% if run.failed? %>
+            <tr class="collapse" id="run-<%= run.id %>">
+              <td colspan="4" class="bg-light">
+                <% run.failures.each do |f| %>
+                  <div class="mb-3">
+                    <strong><%= f["crawler"] %></strong>
+                    <div class="text-danger"><%= f["error"] %></div>
+                    <% if f["backtrace"].present? %>
+                      <pre class="mt-1 p-2 bg-white border rounded small"><%= f["backtrace"].join("\n") %></pre>
+                    <% end %>
+                  </div>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</div>
