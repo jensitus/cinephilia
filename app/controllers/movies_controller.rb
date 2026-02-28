@@ -9,6 +9,7 @@ class MoviesController < ApplicationController
   end
 
   def show
+    @_page_view_viewable = @movie
   end
 
   private

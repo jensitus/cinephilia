@@ -7,6 +7,7 @@ class CinemasController < ApplicationController
   end
 
   def show
+    @_page_view_viewable = @cinema
   end
 
   private
