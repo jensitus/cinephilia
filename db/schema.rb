@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_27_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_28_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -87,6 +87,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_27_000001) do
     t.tsvector "search_vector"
     t.index ["movie_id"], name: "index_movies_on_movie_id", unique: true
     t.index ["search_vector"], name: "index_movies_on_search_vector", using: :gin
+  end
+
+  create_table "page_views", force: :cascade do |t|
+    t.string "path", null: false
+    t.string "county"
+    t.string "viewable_type"
+    t.bigint "viewable_id"
+    t.datetime "occurred_at", null: false
+    t.string "user_agent"
+    t.boolean "is_bot", default: false, null: false
+    t.index ["is_bot"], name: "index_page_views_on_is_bot"
+    t.index ["occurred_at"], name: "index_page_views_on_occurred_at"
+    t.index ["viewable_type", "viewable_id"], name: "index_page_views_on_viewable_type_and_viewable_id"
   end
 
   create_table "people", force: :cascade do |t|

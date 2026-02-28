@@ -1,7 +1,107 @@
 <% content_for :title, "Crawler Dashboard" %>
 
-<div class="container mt-5 pt-4">
-  <h2 class="mb-1">Crawler Dashboard</h2>
+<div class="container mt-3 pt-2">
+  <h2 class="mb-1">Dashboard</h2>
+
+  <%# ── Page view stats ─────────────────────────────────────────────── %>
+  <h5 class="mt-4 mb-3">Page views <span class="text-muted fw-normal fs-6">(humans only)</span></h5>
+  <div class="row g-3 mb-3">
+    <div class="col-sm-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="fs-3 fw-bold"><%= @views_today %></div>
+          <div class="text-muted small">Today</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="card text-center border-secondary">
+        <div class="card-body">
+          <div class="fs-3 fw-bold text-secondary"><%= @bots_today %></div>
+          <div class="text-muted small">Bots today</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="fs-3 fw-bold"><%= @views_7_days %></div>
+          <div class="text-muted small">Last 7 days</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="fs-3 fw-bold"><%= @views_30_days %></div>
+          <div class="text-muted small">Last 30 days</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @daily_counts.any? %>
+    <table class="table table-sm table-bordered mb-4" style="width:auto">
+      <thead class="table-light">
+        <tr>
+          <% @daily_counts.each_key do |date| %>
+            <th class="text-center small"><%= Date.parse(date.to_s).strftime("%d.%m.") %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <% @daily_counts.each_value do |count| %>
+            <td class="text-center"><%= count %></td>
+          <% end %>
+        </tr>
+      </tbody>
+    </table>
+  <% end %>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <h6 class="text-muted text-uppercase small mb-2">Top movies (30 days)</h6>
+      <% if @top_movies.any? %>
+        <ol class="mb-0">
+          <% @top_movies.each do |movie, count| %>
+            <li><%= movie.title %> <span class="text-muted small">(<%= count %>)</span></li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="text-muted small">No data yet.</p>
+      <% end %>
+    </div>
+    <div class="col-md-4">
+      <h6 class="text-muted text-uppercase small mb-2">Top cinemas (30 days)</h6>
+      <% if @top_cinemas.any? %>
+        <ol class="mb-0">
+          <% @top_cinemas.each do |cinema, count| %>
+            <li><%= cinema.title %> <span class="text-muted small">(<%= count %>)</span></li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="text-muted small">No data yet.</p>
+      <% end %>
+    </div>
+    <div class="col-md-4">
+      <h6 class="text-muted text-uppercase small mb-2">Views by county (30 days)</h6>
+      <% if @views_by_county.any? %>
+        <ul class="list-unstyled mb-0">
+          <% @views_by_county.each do |county, count| %>
+            <li><%= county %> <span class="text-muted small">(<%= count %>)</span></li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-muted small">No data yet.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <hr class="mb-4">
+
+  <%# ── Crawler runs ────────────────────────────────────────────────── %>
+  <h5 class="mb-3">Crawler runs</h5>
   <p class="text-muted mb-4">Last <%= @runs.size %> runs</p>
 
   <% if @runs.empty? %>
