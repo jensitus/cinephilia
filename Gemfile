@@ -38,7 +38,7 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 gem "dartsass-rails"
-gem "bootstrap", "~> 5.3.3"
+gem "bootstrap", "~> 5.3.8"
 
 gem "nokogiri"
 
