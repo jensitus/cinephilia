@@ -9,10 +9,11 @@ class Search
     return {} if query.blank?
 
     {
-      movies: Movie.search(query).limit(10),
-      cinemas: Cinema.search(query).limit(10),
+      movies_current: Movie.search(query).currently_showing,
+      movies_archived: Movie.search(query).not_currently_showing,
+      cinemas: Cinema.search(query),
       genres: Genre.search(query).includes(:movies).limit(10),
-      people: Person.search(query).includes(:movies).limit(10)
+      people: Person.search(query).includes(:movies)
     }
   end
 

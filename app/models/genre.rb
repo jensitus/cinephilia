@@ -1,7 +1,7 @@
 class Genre < ApplicationRecord
-  # include Searchable
-
   has_and_belongs_to_many :movies
+
+  validates :name, presence: true, uniqueness: true
 
   scope :search, ->(query) {
     return none if query.blank?
@@ -10,8 +10,8 @@ class Genre < ApplicationRecord
       .order(
         Arel.sql(
           sanitize_sql_array([
-                               "ts_rank(search_vector, plainto_tsquery('german', '#{sanitize_sql_like(query)}')) DESC"
-                             ])
+            "ts_rank(search_vector, plainto_tsquery('german', '#{sanitize_sql_like(query)}')) DESC"
+          ])
         )
       )
   }
@@ -24,8 +24,8 @@ class Genre < ApplicationRecord
     movies.not_currently_showing.order(:title)
   end
 
-  scope :find_or_create_genre, ->(genre) do
-    genre = Genre.find_or_initialize_by(name: genre)
+  def self.find_or_create_genre(genre_name)
+    genre = find_or_initialize_by(name: genre_name)
     genre.save if genre.new_record?
     genre
   end

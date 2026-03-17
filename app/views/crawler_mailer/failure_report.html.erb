@@ -1,0 +1,10 @@
+<h2>Crawler failure report</h2>
+<p><strong>Run at:</strong> <%= @ran_at.strftime('%d.%m.%Y %H:%M:%S') %></p>
+<p><strong><%= @failures.size %> crawler(s) failed:</strong></p>
+
+<% @failures.each do |f| %>
+  <hr>
+  <h3><%= f[:crawler] %></h3>
+  <p><strong>Error:</strong> <%= f[:error] %></p>
+  <pre style="background:#f5f5f5;padding:1em;font-size:0.85em"><%= f[:backtrace].join("\n") %></pre>
+<% end %>

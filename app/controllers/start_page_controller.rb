@@ -1,39 +1,31 @@
 class StartPageController < ApplicationController
-  before_action :set_movies
-  before_action :cinemas_for_homepage
+  before_action :set_movies_with_cinemas
   before_action :get_tags
 
-  VOTIV_KINO = "Votiv Kino"
-  DE_FRANCE = "De France"
-  SCHIKANEDER = "Schikaneder"
-  GARTENBAU_KINO = "Gartenbaukino"
-  BURG_KINO = "Burg Kino"
-  TOP_KINO = "Top Kino"
-
   def home
+    @heading = featured_cinema_titles.to_sentence(last_word_connector: " and ")
   end
 
   private
 
-  def cinemas_for_homepage
-    @movie_hash = Hash.new
-    @movie_hash.update VOTIV_KINO     => @votiv
-    @movie_hash.update TOP_KINO       => @top_kino
-    @movie_hash.update DE_FRANCE      => @de_france
-    @movie_hash.update GARTENBAU_KINO => @gartenbau
-    @movie_hash.update BURG_KINO      => @burg
-  end
-
-  def set_movies
-    @votiv     =  Cinema.get_random_movie_for_start_page VOTIV_KINO
-    @top_kino  =  Cinema.get_random_movie_for_start_page TOP_KINO
-    @de_france =  Cinema.get_random_movie_for_start_page DE_FRANCE
-    @gartenbau =  Cinema.get_random_movie_for_start_page GARTENBAU_KINO
-    @burg      =  Cinema.get_random_movie_for_start_page BURG_KINO
+  def set_movies_with_cinemas
+    @movies_with_cinemas = Movie.movies_with_cinemas_for_startpage(featured_cinema_titles)
   end
 
   def get_tags
-    @tags = Tag.all
-    @tags.delete(Tag.left_outer_joins(:schedules).where(schedules: { id: nil }))
+    @tags = Tag.joins(schedules: :cinema)
+               .where(cinemas: { county: current_county })
+               .distinct
+  end
+
+  def featured_cinema_titles
+    @featured_cinema_titles ||= begin
+      cinemas = Cinephilia::Config::FEATURED_CINEMAS[current_county]
+      if cinemas.present?
+        cinemas
+      else
+        Cinema.in_county(current_county).pluck(:title)
+      end
+    end
   end
 end
