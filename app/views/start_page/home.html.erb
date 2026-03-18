@@ -12,10 +12,8 @@
         <% end %>
       </div>
 
-      <div class="row mt-5">
-        <% @tags.each do |tag| %>
-          <b><%= link_to tag.name, "/tags/" + tag.id.to_s, class: 'do_not_underline' %></b>
-        <% end %>
+      <div class="row mt-5 d-none d-md-block">
+        <%= render "tags" %>
       </div>
 
     </div>
@@ -49,6 +47,12 @@
       </div>
     </div>
 
+  </div>
+
+  <div class="row mt-4 d-md-none">
+    <div class="col">
+      <%= render "tags" %>
+    </div>
   </div>
 
 </div>
