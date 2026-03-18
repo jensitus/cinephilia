@@ -10,4 +10,8 @@ namespace :dev do
 
     puts "Schedules refreshed! #{Schedule.where('time >= ?', Date.today).count} future schedules."
   end
+
+  task test_crawler: :environment do
+    Crawlers::FilmarchivCrawlerService.new.call
+  end
 end

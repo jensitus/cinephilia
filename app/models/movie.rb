@@ -62,7 +62,6 @@ class Movie < ApplicationRecord
   def self.set_date
     current_date = Date.today
     end_date = Date.today + Cinephilia::Config::DAYS_TO_FETCH
-    fetch_movies_for_date_range(current_date, end_date)
     failures = []
     crawlers = Crawlers::BaseCrawlerService.all_crawlers
     crawlers.each do |crawler|
@@ -75,6 +74,7 @@ class Movie < ApplicationRecord
     end
     CrawlerRun.create!(ran_at: Time.current, crawler_count: crawlers.size, failures: failures)
     CrawlerMailer.failure_report(failures).deliver_now if failures.any?
+    fetch_movies_for_date_range(current_date, end_date)
     Schedule.delete_old_schedules(current_date)
     Schedule.delete_schedules_without_movies
   end

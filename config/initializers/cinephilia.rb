@@ -21,7 +21,8 @@ module Cinephilia
         "De France",
         "Gartenbaukino",
         "Burg Kino",
-        "Schikaneder"
+        "Schikaneder",
+        "Metro Kinokulturhaus"
       ]
     }.freeze
 
