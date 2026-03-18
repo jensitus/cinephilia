@@ -62,7 +62,7 @@ class Movie < ApplicationRecord
   def self.set_date
     current_date = Date.today
     end_date = Date.today + Cinephilia::Config::DAYS_TO_FETCH
-    # fetch_movies_for_date_range(current_date, end_date)
+    fetch_movies_for_date_range(current_date, end_date)
     failures = []
     crawlers = Crawlers::BaseCrawlerService.all_crawlers
     crawlers.each do |crawler|
