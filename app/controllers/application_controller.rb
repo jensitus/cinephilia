@@ -21,9 +21,16 @@ class ApplicationController < ActionController::Base
       viewable:    @_page_view_viewable,
       occurred_at: Time.current,
       user_agent:  ua,
-      is_bot:      PageView.bot?(ua)
+      is_bot:      PageView.bot?(ua) || high_request_rate?(request.remote_ip)
     )
   rescue StandardError => e
     Rails.logger.warn "PageView tracking failed: #{e.message}"
+  end
+
+  def high_request_rate?(ip)
+    return false if ip.blank?
+    key = "pv_rate:#{ip}"
+    count = Rails.cache.increment(key, 1, expires_in: 1.minute)
+    count > 10
   end
 end
