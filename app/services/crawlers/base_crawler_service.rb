@@ -22,9 +22,11 @@ module Crawlers
       return movie if movie&.tmdb_id.present?
 
       movie ||= Movie.new(movie_id: movie_string_id, title: display_title)
-
+      puts movie.inspect
       if movie.tmdb_id.blank?
+        puts "movie.tmdb_id is blank"
         tmdb_id = lookup_tmdb_id(original_title, display_title, year)
+        puts "tmdb_id: #{tmdb_id}"
         TmdbUtility.fetch_movie_info_from_tmdb(movie, tmdb_id) if tmdb_id.present?
       end
 

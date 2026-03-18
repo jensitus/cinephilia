@@ -36,3 +36,4 @@
 /config/postgres_password
 
 .idea/
+/node_modules

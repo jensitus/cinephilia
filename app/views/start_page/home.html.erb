@@ -4,15 +4,17 @@
       <div class="row">
         <%= image_tag "/cinephilia_logo_red.png", width: 250 %>
       </div>
-      <div class="row mt-5">
-        <% @tags.each do |tag| %>
-          <b><%= link_to tag.name, "/tags/" + tag.id.to_s, class: 'do_not_underline' %></b>
-        <% end %>
-      </div>
+
       <div class="row mt-3">
         <%= form_with url: search_path, method: :get, local: true, class: "header-search" do |f| %>
           <%= f.text_field :q, placeholder: "Search...", class: "search-input" %>
           <%= f.submit "Search", class: "search-button" %>
+        <% end %>
+      </div>
+
+      <div class="row mt-5">
+        <% @tags.each do |tag| %>
+          <b><%= link_to tag.name, "/tags/" + tag.id.to_s, class: 'do_not_underline' %></b>
         <% end %>
       </div>
 
