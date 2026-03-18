@@ -18,10 +18,12 @@ module TitleConcern
   def self.match_altered_title?(tmdb_result, movie_query_title, movie_title_json, year)
     tmdb_title = normalize_title(tmdb_result["title"])
     normalized_json_title = normalize_title(movie_title_json)
+    normalized_query_title = normalize_title(movie_query_title)
     if movie_query_title.match?(/\A\?*\z/)
       titles_match?(tmdb_title, movie_query_title)
     else
       titles_match?(tmdb_title, normalized_json_title) ||
+        titles_match?(tmdb_title, normalized_query_title) ||
         title_prefix_of?(movie_title_json, tmdb_result["title"])
     end
   end
