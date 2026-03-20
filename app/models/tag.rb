@@ -15,6 +15,10 @@ class Tag < ApplicationRecord
     tag
   end
 
+  def to_param
+    slug
+  end
+
   def self.slug_from_name(name)
     parts = name.split(/:\s*/, 2)
     parts.map(&:parameterize).join("/")
