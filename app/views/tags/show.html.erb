@@ -8,26 +8,26 @@
       </p>
     </div>
   </div>
-  <div class="row mt-5">
-    <% @movie_schedules.each do |date, cine| %>
-      <div class="col-md-1 sticky-top p-2 m-2 bg-primary-subtle text-black text-center rounded" style="top: 70px; z-index: 1;">
-        <b><%= date %></b>
+  <% @movie_schedules.each do |date, cine| %>
+    <div class="row mt-5">
+      <div class="col-md-1 sticky-top align-self-start" style="top: 70px; z-index: 1031;">
+        <div class="p-2 bg-primary-subtle text-black text-center rounded">
+          <b><%= date %></b>
+        </div>
       </div>
-      <div class="col-md-11"></div>
-      <div class="col-md-2">
-
-      </div>
-      <div class="col-md-10">
+      <div class="col-md-11">
 
         <% cine.each do |cinema, v| %>
           <div class="row">
-            <div class="col-md-12 p-2 m-2 bg-body-secondary text-black rounded">
-              <b><%= cinema %></b>
+            <div class="col-md-12">
+              <div class="p-2 mb-3 bg-body-secondary text-black rounded">
+                <b><%= cinema %></b>
+              </div>
             </div>
 
             <% v.each do |value| %>
 
-              <div class="col-md-4 mb-3">
+              <div class="col-md-4">
                 <div>
                   <%= image_tag("https://image.tmdb.org/t/p/w500" + value.movie.poster_path, width: "60", class: "float-start me-3") unless value.movie.poster_path.nil? %>
                 </div>
@@ -57,8 +57,7 @@
           </div>
         <% end %>
       </div>
-    <% end %>
-
-  </div>
+    </div>
+  <% end %>
 </div>
 
