@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get "/search", to: "search#index", as: :search
   get "/search/autocomplete", to: "search#autocomplete", as: :search_autocomplete
-  resources :tags, only: [ :index, :show ]
+  resources :tags, only: [ :index ]
   get "/legal", to: "legal#show"
   get "/home", to: "start_page#home", as: :home
   get "fetch_movies/get"
@@ -24,4 +24,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   root "start_page#home"
+
+  get "tags/*slug", to: "tags#show", as: :tag
 end

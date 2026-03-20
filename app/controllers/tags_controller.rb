@@ -14,7 +14,7 @@ class TagsController < ApplicationController
   private
 
   def set_tag
-    @tag = Tag.find(params.expect(:id))
+    @tag = Tag.find_by!(slug: params[:slug])
   end
 
   def set_movie_schedules

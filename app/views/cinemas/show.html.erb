@@ -56,7 +56,7 @@
                     </span>
                     <% schedule_value.tags.each do |tag| %>
                       <span class="text-secondary small">
-                        <%= link_to tag.name, "/tags/" + tag.id.to_s, class: 'do_not_underline' %>
+                        <%= link_to tag.name, "/tags/#{tag.slug}", class: 'do_not_underline' %>
                       </span>
                     <% end %>
                   <% end %>
