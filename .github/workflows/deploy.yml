@@ -26,22 +26,19 @@ jobs:
 
       - name: Add server to known hosts
         run: |
-          ssh-keygen -R 162.55.208.247 || true
+          ssh-keyscan 162.55.208.247 >> ~/.ssh/known_hosts
           ssh-keyscan -H 162.55.208.247 >> ~/.ssh/known_hosts
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Check secret lengths
-        env:
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      - name: Write secret files
         run: |
-          echo "RAILS_MASTER_KEY length: ${#RAILS_MASTER_KEY}"
+          echo "${{ secrets.RAILS_MASTER_KEY }}" > config/master.key
+          echo "${{ secrets.POSTGRES_PASSWORD }}" > config/postgres_password
+          echo "${{ secrets.TMDB_TOKEN }}" > config/tmdb_token
 
       - name: Run Kamal deploy
         env:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
         run: bin/kamal deploy
