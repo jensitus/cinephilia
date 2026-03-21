@@ -16,6 +16,8 @@ class Cinema < ApplicationRecord
 
   def self.process_cinemas_and_schedules(movie_json, movie_id)
     movie_json["nestedResults"].each do |nested_result|
+      next if Cinephilia::Config::FILM_AT_EXCLUDED_CINEMAS.include?(nested_result["parent"]["title"])
+
       cinema = find_or_create_cinema(nested_result["parent"])
       Schedule.create_schedules_with_tags(nested_result["screenings"], movie_id, cinema.id)
     end
