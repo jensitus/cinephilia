@@ -4,6 +4,7 @@ body {
 
 .do_not_underline {
     text-decoration: none;
+    color: inherit;
 }
 
 .more {

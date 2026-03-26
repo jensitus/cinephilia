@@ -23,36 +23,51 @@
 </head>
 
 <body class="d-flex flex-column h-100">
-<nav class="navbar fixed-top bg-warning">
+<nav class="navbar navbar-expand-md fixed-top bg-warning" data-controller="navbar">
   <div class="container-fluid">
-    <div class="navbar-text">
-      <span style="font-family: 'Baloo Bhaijaan',serif; font-weight: bold; font-size: x-large">
-        <%= link_to root_url(county: county_param), class: 'do_not_underline' do %>
-          <img src="/icon.png" alt="cinephilia" width="35">
+
+    <span class="navbar-brand" style="font-family: 'Baloo Bhaijaan',serif; font-weight: bold; font-size: x-large">
+      <%= link_to root_url(county: county_param), class: 'do_not_underline' do %>
+        <img src="/icon.png" alt="cinephilia" width="35">
+      <% end %>
+      <%= link_to "Kino #{current_county}", root_url(county: county_param), class: 'do_not_underline' %>
+    </span>
+
+    <div class="dropdown ms-auto order-md-last" data-controller="dropdown">
+      <a class="dropdown-toggle do_not_underline nav-link" href="#" role="button"
+         data-action="click->dropdown#toggle">
+        <%= current_county %>
+      </a>
+      <ul class="dropdown-menu" style="right: 0; left: auto;" data-dropdown-target="menu">
+        <% available_counties.each do |county| %>
+          <li>
+            <%= link_to county, url_for(county: county), class: "dropdown-item #{'active' if county == current_county}" %>
+          </li>
         <% end %>
-        <%= link_to "Kino #{current_county}", root_url(county: county_param), class: 'do_not_underline mobile-hidden' %>
-      </span>
-      <span class="m-3 mobile-hidden">
-        <%= link_to "Cinemas", cinemas_path(county: county_param), class: 'do_not_underline' %>
-      </span>
-      <span class="m-2 mobile-hidden">
-        <%= link_to "Movies", movies_path(county: county_param), class: 'do_not_underline' %>
-      </span>
-      <span class="m-2">
-        <%= link_to "Search", search_path(county: county_param), class: 'do_not_underline' %>
-      </span>
-      <span class="dropdown m-2" data-controller="dropdown">
-        <a class="dropdown-toggle do_not_underline" href="#" role="button" data-action="click->dropdown#toggle">
-          <%= current_county %>
-        </a>
-        <ul class="dropdown-menu" data-dropdown-target="menu">
-          <% available_counties.each do |county| %>
-            <li>
-              <%= link_to county, url_for(county: county), class: "dropdown-item #{'active' if county == current_county}" %>
-            </li>
-          <% end %>
-        </ul>
-      </span>
+      </ul>
+    </div>
+
+    <button class="navbar-toggler border-0" type="button"
+            data-action="click->navbar#toggle"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav" data-navbar-target="menu">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <li class="nav-item">
+          <%= link_to "Cinemas", cinemas_path(county: county_param), class: 'nav-link do_not_underline' %>
+        </li>
+        <li class="nav-item">
+          <%= link_to "Movies", movies_path(county: county_param), class: 'nav-link do_not_underline' %>
+        </li>
+        <li class="nav-item">
+          <%= link_to "Specials", tags_path(county: county_param), class: 'nav-link do_not_underline' %>
+        </li>
+        <li class="nav-item">
+          <%= link_to "Search", search_path(county: county_param), class: 'nav-link do_not_underline' %>
+        </li>
+      </ul>
     </div>
 
   </div>
