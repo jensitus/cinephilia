@@ -21,6 +21,16 @@ module Tmdb
         fetch(url)
       end
 
+      def search_person(name)
+        url = UriService.call("#{BASE_URL}/search/person?query=#{URI.encode_www_form_component(name)}&#{LANGUAGE_REGION}")
+        fetch(url)
+      end
+
+      def get_person_movie_credits(person_id)
+        url = UriService.call("#{BASE_URL}/person/#{person_id}/movie_credits?#{LANGUAGE_REGION}")
+        fetch(url)
+      end
+
       def build_search_url(query)
         normalized_query = NormalizeAndCleanService.call(query)
         UriService.call("#{SEARCH_MOVIE_ENDPOINT}?query=#{normalized_query}&#{LANGUAGE_REGION}")

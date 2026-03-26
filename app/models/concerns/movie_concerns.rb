@@ -5,8 +5,11 @@ class MovieConcerns
     query.match?(/\A\?*\z/) || query.match?(/\A.{4} .\z/) ? NormalizeAndCleanService.call(fallback_title) : query
   end
 
-  def self.assign_movie_attributes(movie, tmdb_id, description, poster_path, credits, runtime)
-    movie.update(tmdb_id: tmdb_id, description: description, poster_path: poster_path, runtime: runtime)
+  def self.assign_movie_attributes(movie, tmdb_id, description:, poster_path:, credits:, runtime:, year: nil, countries: nil)
+    attrs = { tmdb_id: tmdb_id, description: description, poster_path: poster_path, runtime: runtime }
+    attrs[:year]      = year      if year.present? && movie.year.blank?
+    attrs[:countries] = countries if countries.present? && movie.countries.blank?
+    movie.update(attrs)
     assign_cast_to_person(credits["cast"], movie) if credits.present?
     assign_crew_to_person(credits["crew"], movie) if credits.present?
   end

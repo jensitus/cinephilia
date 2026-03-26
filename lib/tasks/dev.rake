@@ -14,4 +14,9 @@ namespace :dev do
   task test_crawler: :environment do
     Crawlers::FilmarchivCrawlerService.new.call
   end
+
+  task test_votiv_crawler: :environment do
+    Crawlers::VotivKinoCrawlerService.new.call
+    end
+
 end

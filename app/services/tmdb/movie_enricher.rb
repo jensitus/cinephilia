@@ -11,28 +11,21 @@ module Tmdb
       return unless tmdb_id
 
       id_string = tmdb_id.to_s
-      description = fetch_description(id_string)
-      poster_path = fetch_attribute(id_string, "poster_path")
-      runtime = fetch_attribute(id_string, "runtime")
+      movie_data = Tmdb::Client.get_movie(id_string)
       credits = Tmdb::Client.get_credits(id_string)
 
-      MovieConcerns.assign_movie_attributes(movie, tmdb_id, description, poster_path, credits, runtime)
-    end
+      description = movie_data&.dig("overview").presence ||
+                    Tmdb::Client.get_movie(id_string, with_language: false)&.dig("overview")
 
-    private
-
-    def fetch_description(id_string)
-      description = fetch_attribute(id_string, "overview")
-      return description if description.present?
-
-      fetch_attribute(id_string, "overview", without_language: true)
-    end
-
-    def fetch_attribute(id_string, attribute, without_language: false)
-      movie_data = Tmdb::Client.get_movie(id_string, with_language: !without_language)
-      return nil if movie_data.nil?
-
-      movie_data[attribute]
+      MovieConcerns.assign_movie_attributes(
+        movie, tmdb_id,
+        description:  description,
+        poster_path:  movie_data&.dig("poster_path"),
+        credits:      credits,
+        runtime:      movie_data&.dig("runtime"),
+        year:         movie_data&.dig("release_date")&.slice(0, 4),
+        countries:    movie_data&.dig("production_countries")&.map { |c| c["iso_3166_1"] }&.join(", ")
+      )
     end
   end
 end

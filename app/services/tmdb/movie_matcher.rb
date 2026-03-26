@@ -1,15 +1,22 @@
 module Tmdb
   class MovieMatcher
-    attr_reader :original_title, :display_title, :year, :film_at_uri
+    attr_reader :original_title, :display_title, :year, :film_at_uri, :director_hint
 
-    def initialize(original_title:, display_title:, year:, film_at_uri: nil)
+    def initialize(original_title:, display_title:, year:, film_at_uri: nil, director_hint: nil)
       @original_title = original_title
-      @display_title = display_title
-      @year = year
-      @film_at_uri = film_at_uri
+      @display_title  = display_title
+      @year           = year
+      @film_at_uri    = film_at_uri
+      @director_hint  = director_hint
     end
 
     def find_tmdb_id
+      tmdb_id = em_dash_part_search
+      return tmdb_id if tmdb_id.present?
+
+      tmdb_id = director_based_search
+      return tmdb_id if tmdb_id.present?
+
       url = build_search_url(original_title)
       tmdb_id = search_and_match(url)
       return tmdb_id if tmdb_id.present?
@@ -26,7 +33,6 @@ module Tmdb
     end
 
     def search_and_match(url)
-      results = Tmdb::Client.get_movie(nil) # This won't work, need to fetch search results
       results = TmdbResultService.call(url)
       return nil unless results&.dig("results")
 
@@ -69,6 +75,70 @@ module Tmdb
     def year_within_range?(tmdb_release_year)
       return true if year == "0"
       (year.to_i - 1..year.to_i + 1).include?(tmdb_release_year)
+    end
+
+    def em_dash_part_search
+      return nil unless original_title.match?(/\s[–—]\s/)
+
+      first_part, second_part = original_title.split(/\s[–—]\s/, 2)
+      normalized_second = NormalizeAndCleanService.call(second_part)
+
+      url = build_search_url(first_part)
+      results = TmdbResultService.call(url)
+      return nil unless results&.dig("results")
+
+      results["results"].each do |result|
+        movie_details = Tmdb::Client.get_movie(result["id"])
+        next unless movie_details
+
+        tmdb_release_year = extract_release_year(movie_details)
+        next unless year_within_range?(tmdb_release_year)
+
+        if director_hint.present?
+          return result["id"] if director_hint_matches?(result["id"])
+        else
+          tmdb_title_normalized = TitleConcern.normalize_title(movie_details["title"])
+          return result["id"] if tmdb_title_normalized == normalized_second
+        end
+      end
+
+      nil
+    end
+
+    def director_based_search
+      return nil unless director_hint.present? && original_title.match?(/\s[–—]\s/)
+
+      person_results = Tmdb::Client.search_person(director_hint)
+      return nil unless person_results&.dig("results")&.any?
+
+      person_id = person_results["results"].first["id"]
+      credits = Tmdb::Client.get_person_movie_credits(person_id)
+      return nil unless credits&.dig("crew")
+
+      first_part, second_part = original_title.split(/\s[–—]\s/, 2)
+      normalized_first  = NormalizeAndCleanService.call(first_part)
+      normalized_second = NormalizeAndCleanService.call(second_part)
+
+      credits["crew"].each do |credit|
+        next unless credit["job"] == "Director"
+
+        tmdb_title_normalized    = TitleConcern.normalize_title(credit["title"])
+        tmdb_original_normalized = TitleConcern.normalize_title(credit["original_title"])
+        next unless tmdb_title_normalized == normalized_second ||
+                    tmdb_original_normalized == normalized_first
+
+        tmdb_release_year = extract_release_year(credit)
+        return credit["id"] if year_within_range?(tmdb_release_year)
+      end
+
+      nil
+    end
+
+    def director_hint_matches?(tmdb_id)
+      return true unless director_hint.present?
+
+      credits = Tmdb::Client.get_credits(tmdb_id)
+      credits&.dig("crew")&.any? { |c| c["job"] == "Director" && c["name"] == director_hint }
     end
 
     def fallback_search

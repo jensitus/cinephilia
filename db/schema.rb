@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_20_055729) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_26_070322) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_20_055729) do
     t.string "telephone"
     t.string "email"
     t.tsvector "search_vector"
+    t.text "notes"
     t.index ["cinema_id"], name: "index_cinemas_on_cinema_id", unique: true
     t.index ["search_vector"], name: "index_cinemas_on_search_vector", using: :gin
   end

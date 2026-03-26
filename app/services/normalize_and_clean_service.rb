@@ -13,6 +13,7 @@ class NormalizeAndCleanService < BaseService
 
   def normalize_and_clean
     decoded_string = decode_unicode_escapes(@to_be_normalized)
+    decoded_string = decoded_string.gsub(/\s[–—]\s.*$/, "")
     normalized_string = I18n.transliterate(decoded_string).downcase
     return_value = normalized_string.gsub("ä", "a")
                                     .gsub("ö", "o")
