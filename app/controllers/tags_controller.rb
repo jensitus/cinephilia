@@ -1,11 +1,20 @@
 class TagsController < ApplicationController
-  before_action :set_tag, only: [ :show ]
-  before_action :set_movie_schedules, only: [ :show ]
+  before_action :set_tag, only: [:show]
+  before_action :set_movie_schedules, only: [:show]
 
   def index
     @tags = Tag.joins(schedules: :cinema)
                .where(cinemas: { county: current_county })
                .distinct
+
+    @cinemas_by_tag = Schedule.joins(:tags, :cinema)
+                              .where(tags: { id: @tags.map(&:id) })
+                              .where(cinemas: { county: current_county })
+                              .distinct
+                              .pluck("tags.id", "cinemas.title")
+                              .each_with_object(Hash.new { |h, k| h[k] = [] }) do |(tag_id, cinema_title), hash|
+      hash[tag_id] |= [cinema_title]
+    end
   end
 
   def show
