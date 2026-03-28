@@ -1,3 +1,4 @@
+<%= content_for :title, "Festivals & Specials" %>
 <div class="container">
   <div class="row mb-4">
     <div class="col-md-12">
@@ -9,7 +10,7 @@
     <div class="row g-4 mb-2">
       <% tags.each do |tag| %>
         <div class="col-md-4 col-sm-6">
-          <%= link_to "/tags/#{tag.slug}", class: "do_not_underline", data: { controller: "expandable", action: "click->expandable#toggle" } do %>
+          <%= link_to "/specials/#{tag.slug}", class: "do_not_underline", data: { controller: "expandable", action: "click->expandable#toggle" } do %>
             <div class="card border-0 shadow-sm">
               <div class="card-body">
                 <h5 class="card-title"><%= tag.name %></h5>

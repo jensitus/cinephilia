@@ -12,11 +12,6 @@
     <div class="row">
       <div class="col-xl-6">
         <%= render @cinema %>
-        <% if @cinema.notes.present? %>
-          <div class="alert alert-info mt-3">
-            <%= @cinema.notes %>
-          </div>
-        <% end %>
         <% if @cinema.street.present? %>
           <div class="mt-3"
                data-controller="cinema-map"
@@ -30,6 +25,11 @@
             </button>
             <div data-cinema-map-target="mapContainer" style="height: 300px;"></div>
             <div data-cinema-map-target="directionsContainer"></div>
+          </div>
+        <% end %>
+        <% if @cinema.notes.present? %>
+          <div class="alert alert-info mt-3">
+            <%= @cinema.notes %>
           </div>
         <% end %>
         <div class="mt-5">
@@ -61,7 +61,7 @@
                     </span>
                     <% schedule_value.tags.each do |tag| %>
                       <span class="text-secondary small">
-                        <%= link_to tag.name, "/tags/#{tag.slug}", class: 'do_not_underline' %>
+                        <%= link_to tag.name, "/specials/#{tag.slug}", class: 'do_not_underline' %>
                       </span>
                     <% end %>
                   <% end %>
