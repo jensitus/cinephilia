@@ -136,6 +136,5 @@ module Crawlers
       return today.year unless candidate
       candidate < today - 60 ? today.year + 1 : today.year
     end
-
   end
 end
