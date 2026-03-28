@@ -1,3 +1,4 @@
+<%= content_for :title, "Festivals & Specials" %>
 <div class="container">
   <div class="row mb-4">
     <div class="col-md-12">
@@ -9,12 +10,12 @@
     <div class="row g-4 mb-2">
       <% tags.each do |tag| %>
         <div class="col-md-4 col-sm-6">
-          <%= link_to "/tags/#{tag.slug}", class: "do_not_underline" do %>
-            <div class="card h-100 border-0 shadow-sm">
+          <%= link_to "/specials/#{tag.slug}", class: "do_not_underline", data: { controller: "expandable", action: "click->expandable#toggle" } do %>
+            <div class="card border-0 shadow-sm">
               <div class="card-body">
                 <h5 class="card-title"><%= tag.name %></h5>
                 <% if tag.description.present? %>
-                  <p class="card-text text-secondary small"><%= truncate(tag.description, length: 160) %></p>
+                  <p class="card-text text-secondary small tag-description"><%= tag.description %></p>
                 <% end %>
               </div>
               <div class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center">

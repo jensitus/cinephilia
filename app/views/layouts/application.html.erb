@@ -30,7 +30,7 @@
       <%= link_to root_url(county: county_param), class: 'do_not_underline' do %>
         <img src="/icon.png" alt="cinephilia" width="35">
       <% end %>
-      <%= link_to "Kino #{current_county}", root_url(county: county_param), class: 'do_not_underline' %>
+      <%= link_to "Kino #{current_county}", root_url(county: county_param), class: 'do_not_underline d-none d-md-inline' %>
     </span>
 
     <div class="dropdown ms-auto order-md-last" data-controller="dropdown">
@@ -47,7 +47,7 @@
       </ul>
     </div>
 
-    <button class="navbar-toggler border-0" type="button"
+    <button class="navbar-toggler border-0" style="margin-left: 5px;" type="button"
             data-action="click->navbar#toggle"
             aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -62,7 +62,7 @@
           <%= link_to "Movies", movies_path(county: county_param), class: 'nav-link do_not_underline' %>
         </li>
         <li class="nav-item">
-          <%= link_to "Specials", tags_path(county: county_param), class: 'nav-link do_not_underline' %>
+          <%= link_to "Specials", specials_path(county: county_param), class: 'nav-link do_not_underline' %>
         </li>
         <li class="nav-item">
           <%= link_to "Search", search_path(county: county_param), class: 'nav-link do_not_underline' %>

@@ -1,5 +1,3 @@
-require "net/http"
-
 module Crawlers
   class CineplexxSpittalCrawlerService < BaseCrawlerService
     API_V2_BASE = "https://app.cineplexx.at/api/v2"
@@ -23,14 +21,6 @@ module Crawlers
     end
 
     private
-
-    def fetch_json(url)
-      response = Net::HTTP.get_response(URI.parse(url))
-      JSON.parse(response.body)
-    rescue StandardError => e
-      Rails.logger.error "#{self.class.name}: fetch failed #{url} - #{e.message}"
-      nil
-    end
 
     def process_movie(movie_data, cinema)
       all_sessions = fetch_json("#{API_V2_BASE}/movies/#{movie_data['id']}/sessions")
