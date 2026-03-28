@@ -1,5 +1,3 @@
-require "net/http"
-
 module Crawlers
   class CinepointCrawlerService < BaseCrawlerService
     CINEMA_ID     = "t-cinepoint-seefeld"
@@ -139,16 +137,5 @@ module Crawlers
       candidate < today - 60 ? today.year + 1 : today.year
     end
 
-    # ── HTTP ──────────────────────────────────────────────────────────────────
-
-    def fetch_page(url)
-      uri  = URI.parse(url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.get(uri.request_uri).body
-    rescue StandardError => e
-      Rails.logger.error "#{self.class.name}: fetch failed (#{url}) – #{e.message}"
-      nil
-    end
   end
 end

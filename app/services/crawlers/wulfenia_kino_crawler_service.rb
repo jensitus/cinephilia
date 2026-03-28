@@ -1,5 +1,3 @@
-require "net/http"
-
 module Crawlers
   class WulfeniaKinoCrawlerService < BaseCrawlerService
     CINEMA_ID = "t-wulfenia-kino"
@@ -10,7 +8,7 @@ module Crawlers
     VIENNA_TZ = ActiveSupport::TimeZone["Vienna"]
 
     def call
-      html = fetch_page
+      html = fetch_page(PROGRAMME_URL)
       return unless html
 
       programm = extract_programm_json(html)
@@ -21,16 +19,6 @@ module Crawlers
     end
 
     private
-
-    def fetch_page
-      uri = URI.parse(PROGRAMME_URL)
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.get(uri.path).body
-    rescue StandardError => e
-      Rails.logger.error "#{self.class.name}: fetch failed - #{e.message}"
-      nil
-    end
 
     def extract_programm_json(html)
       doc = Nokogiri::HTML(html)

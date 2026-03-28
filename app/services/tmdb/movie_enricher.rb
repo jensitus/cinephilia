@@ -26,6 +26,9 @@ module Tmdb
         year:         movie_data&.dig("release_date")&.slice(0, 4),
         countries:    movie_data&.dig("production_countries")&.map { |c| c["iso_3166_1"] }&.join(", ")
       )
+
+      genre_names = movie_data&.dig("genres")&.map { |g| g["name"] }
+      Movie.associate_genres_with_movie(movie, genre_names) if genre_names.present?
     end
   end
 end

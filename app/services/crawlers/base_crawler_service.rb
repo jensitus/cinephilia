@@ -1,3 +1,5 @@
+require "net/http"
+
 module Crawlers
   class BaseCrawlerService < BaseService
     def self.all_crawlers
@@ -8,7 +10,30 @@ module Crawlers
       subclasses
     end
 
+    BOT_USER_AGENT = "cinephilia-bot/1.0 (+https://cinephilia.at)"
+
     private
+
+    def fetch_page(url)
+      uri  = URI.parse(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = uri.scheme == "https"
+      http.get(uri.request_uri, "User-Agent" => BOT_USER_AGENT).body
+    rescue StandardError => e
+      Rails.logger.error "#{self.class.name}: fetch failed (#{url}) – #{e.message}"
+      nil
+    end
+
+    def fetch_json(url)
+      uri  = URI.parse(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = uri.scheme == "https"
+      response = http.get(uri.request_uri, "User-Agent" => BOT_USER_AGENT)
+      JSON.parse(response.body)
+    rescue StandardError => e
+      Rails.logger.error "#{self.class.name}: fetch failed (#{url}) – #{e.message}"
+      nil
+    end
 
     def find_or_create_cinema(id:, title:, county:, url:)
       cinema = Cinema.find_or_create_by(cinema_id: id)

@@ -1,5 +1,3 @@
-require "net/http"
-
 module Crawlers
   class FilmarchivCrawlerService < BaseCrawlerService
     CINEMA_ID     = "t-metro-kinokulturhaus"
@@ -13,7 +11,6 @@ module Crawlers
     CINEMA_PHONE  = "+43 1 512 18 03"
     PROGRAM_PATH  = "/de/kino/programm"
     VIENNA_TZ     = ActiveSupport::TimeZone["Vienna"]
-    USER_AGENT    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
     def call
       @series_cache = {}
@@ -185,16 +182,6 @@ module Crawlers
       sleep(0.3)
       description = html ? Nokogiri::HTML(html).css("#submodule_id p").first&.text&.strip&.gsub(/\s+/, " ") : nil
       @series_cache[series_url] = description
-    end
-
-    def fetch_page(url)
-      uri  = URI.parse(url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = uri.scheme == "https"
-      http.get(uri.request_uri, "User-Agent" => USER_AGENT).body
-    rescue StandardError => e
-      Rails.logger.error "#{self.class.name}: fetch failed (#{url}) – #{e.message}"
-      nil
     end
   end
 end

@@ -1,5 +1,3 @@
-require "net/http"
-
 module Crawlers
   class VotivKinoCrawlerService < BaseCrawlerService
     PROGRAM_URL  = "https://www.votivkino.at/programm/"
@@ -255,16 +253,6 @@ module Crawlers
         return text.sub(/^Regie:\s*/, "").strip if text.start_with?("Regie:")
       end
 
-      nil
-    end
-
-    def fetch_page(url)
-      uri  = URI.parse(url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.get(uri.request_uri, "User-Agent" => "Mozilla/5.0").body
-    rescue StandardError => e
-      Rails.logger.error "#{self.class.name}: fetch failed (#{url}) – #{e.message}"
       nil
     end
   end
