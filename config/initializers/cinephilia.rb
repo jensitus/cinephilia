@@ -1,6 +1,7 @@
 module Cinephilia
   module Config
     COUNTIES = [
+      "Österreich",
       "Wien",
       "Niederösterreich",
       "Oberösterreich",

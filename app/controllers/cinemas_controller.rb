@@ -1,4 +1,5 @@
 class CinemasController < ApplicationController
+  prepend_before_action :use_cinema_county, only: [ :show ]
   before_action :set_cinema, only: %i[show]
   before_action :set_cinema_schedules, only: %i[show]
 
@@ -11,6 +12,11 @@ class CinemasController < ApplicationController
   end
 
   private
+
+  def use_cinema_county
+    cinema = Cinema.find_by(id: params[:id])
+    params[:county] = cinema.county if cinema
+  end
 
   def set_cinema
     @cinema = Cinema.find(params.expect(:id))

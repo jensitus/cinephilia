@@ -6,7 +6,7 @@ class Cinema < ApplicationRecord
 
   validates :cinema_id, :title, :county, presence: true
 
-  scope :in_county, ->(county) { where(county: county) }
+  scope :in_county, ->(county) { county == "Österreich" ? all : where(county: county) }
 
   def self.get_random_movie_for_start_page(cinema)
     Movie.distinct.joins(schedules: :cinema)

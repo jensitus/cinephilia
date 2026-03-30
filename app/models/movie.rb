@@ -29,12 +29,8 @@ class Movie < ApplicationRecord
   }
 
   scope :in_county, ->(county) {
-    joins(schedules: :cinema).where(cinemas: { county: county }).distinct
+    county == "Österreich" ? all : joins(schedules: :cinema).where(cinemas: { county: county }).distinct
   }
-
-  def currently_showing?
-    schedules.where("time >= ?", Date.today).exists?
-  end
 
   def self.movies_with_cinemas_for_startpage(cinema_titles)
     Movie.distinct
@@ -62,18 +58,18 @@ class Movie < ApplicationRecord
   def self.set_date
     current_date = Date.today
     end_date = Date.today + Cinephilia::Config::DAYS_TO_FETCH
-    # failures = []
-    # crawlers = Crawlers::BaseCrawlerService.all_crawlers
-    # crawlers.each do |crawler|
-    #   Rails.logger.info "Running #{crawler.name}..."
-    #   crawler.call
-    # rescue StandardError => e
-    #   backtrace = e.backtrace&.first(5) || []
-    #   Rails.logger.error "#{crawler.name} failed: #{e.message}\n#{backtrace.join("\n")}"
-    #   failures << { crawler: crawler.name, error: e.message, backtrace: backtrace }
-    # end
-    # CrawlerRun.create!(ran_at: Time.current, crawler_count: crawlers.size, failures: failures)
-    # CrawlerMailer.failure_report(failures).deliver_now if failures.any?
+    failures = []
+    crawlers = Crawlers::BaseCrawlerService.all_crawlers
+    crawlers.each do |crawler|
+      Rails.logger.info "Running #{crawler.name}..."
+      crawler.call
+    rescue StandardError => e
+      backtrace = e.backtrace&.first(5) || []
+      Rails.logger.error "#{crawler.name} failed: #{e.message}\n#{backtrace.join("\n")}"
+      failures << { crawler: crawler.name, error: e.message, backtrace: backtrace }
+    end
+    CrawlerRun.create!(ran_at: Time.current, crawler_count: crawlers.size, failures: failures)
+    CrawlerMailer.failure_report(failures).deliver_now if failures.any?
     fetch_movies_for_date_range(current_date, end_date)
     Schedule.delete_old_schedules(current_date)
     Schedule.delete_schedules_without_movies
