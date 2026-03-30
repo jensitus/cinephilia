@@ -1,5 +1,5 @@
 class CinemasController < ApplicationController
-  prepend_before_action :use_cinema_county, only: [:show]
+  prepend_before_action :use_cinema_county, only: [ :show ]
   before_action :set_cinema, only: %i[show]
   before_action :set_cinema_schedules, only: %i[show]
 
