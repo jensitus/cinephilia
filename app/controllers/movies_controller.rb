@@ -3,7 +3,7 @@ class MoviesController < ApplicationController
   before_action :set_movie_schedules, only: [ :show ]
 
   def index
-    movies = Movie.in_county(current_county).order(title: :asc)
+    movies = Movie.in_county(current_county).currently_showing.order(title: :asc)
     @movies_by_letter = movies.group_by { |movie| movie.title[0].upcase }
                               .transform_values { |movies| movies.map { |m| { id: m.id, title: m.title, poster_path: m.poster_path } } }
   end

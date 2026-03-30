@@ -29,12 +29,8 @@ class Movie < ApplicationRecord
   }
 
   scope :in_county, ->(county) {
-    joins(schedules: :cinema).where(cinemas: { county: county }).distinct
+    county == "Österreich" ? all : joins(schedules: :cinema).where(cinemas: { county: county }).distinct
   }
-
-  def currently_showing?
-    schedules.where("time >= ?", Date.today).exists?
-  end
 
   def self.movies_with_cinemas_for_startpage(cinema_titles)
     Movie.distinct

@@ -1,4 +1,6 @@
 class SearchController < ApplicationController
+  prepend_before_action :use_all_counties
+
   def index
     @query = params[:q]
     @search = Search.new(@query)
@@ -62,5 +64,11 @@ class SearchController < ApplicationController
     end
 
     render json: results.take(10)
+  end
+
+  private
+
+  def use_all_counties
+    params[:county] = "Österreich"
   end
 end
