@@ -4,7 +4,6 @@ Rails.application.routes.draw do
   resources :tags, only: [ :index ], path: "specials", as: "specials"
   get "/legal", to: "legal#show"
   get "/home", to: "start_page#home", as: :home
-  get "fetch_movies/get"
   get "/cinemas", to: "cinemas#index", as: "cinemas"
   get "/cinemas/:id", to: "cinemas#show", as: "cinema"
   get "/movies", to: "movies#index", as: "movies"
