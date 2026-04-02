@@ -106,29 +106,41 @@ module Tmdb
     end
 
     def director_based_search
-      return nil unless director_hint.present? && original_title.match?(/\s[–—]\s/)
+      return nil unless director_hint.present?
 
       person_results = Tmdb::Client.search_person(director_hint)
       return nil unless person_results&.dig("results")&.any?
 
       person_id = person_results["results"].first["id"]
-      credits = Tmdb::Client.get_person_movie_credits(person_id)
+      credits   = Tmdb::Client.get_person_movie_credits(person_id)
       return nil unless credits&.dig("crew")
 
-      first_part, second_part = original_title.split(/\s[–—]\s/, 2)
-      normalized_first  = NormalizeAndCleanService.call(first_part)
-      normalized_second = NormalizeAndCleanService.call(second_part)
+      if original_title.match?(/\s[–—]\s/)
+        first_part, second_part = original_title.split(/\s[–—]\s/, 2)
+        normalized_first  = NormalizeAndCleanService.call(first_part)
+        normalized_second = NormalizeAndCleanService.call(second_part)
 
-      credits["crew"].each do |credit|
-        next unless credit["job"] == "Director"
+        credits["crew"].each do |credit|
+          next unless credit["job"] == "Director"
+          tmdb_title_normalized    = TitleConcern.normalize_title(credit["title"])
+          tmdb_original_normalized = TitleConcern.normalize_title(credit["original_title"])
+          next unless tmdb_title_normalized == normalized_second ||
+                      tmdb_original_normalized == normalized_first
+          tmdb_release_year = extract_release_year(credit)
+          return credit["id"] if year_within_range?(tmdb_release_year)
+        end
+      else
+        normalized = NormalizeAndCleanService.call(original_title)
 
-        tmdb_title_normalized    = TitleConcern.normalize_title(credit["title"])
-        tmdb_original_normalized = TitleConcern.normalize_title(credit["original_title"])
-        next unless tmdb_title_normalized == normalized_second ||
-                    tmdb_original_normalized == normalized_first
-
-        tmdb_release_year = extract_release_year(credit)
-        return credit["id"] if year_within_range?(tmdb_release_year)
+        credits["crew"].each do |credit|
+          next unless credit["job"] == "Director"
+          tmdb_title_normalized    = TitleConcern.normalize_title(credit["title"])
+          tmdb_original_normalized = TitleConcern.normalize_title(credit["original_title"])
+          next unless tmdb_title_normalized == normalized ||
+                      tmdb_original_normalized == normalized
+          tmdb_release_year = extract_release_year(credit)
+          return credit["id"] if year_within_range?(tmdb_release_year)
+        end
       end
 
       nil

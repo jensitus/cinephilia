@@ -23,13 +23,14 @@ module Cinephilia
         "Gartenbaukino",
         "Burg Kino",
         "Schikaneder",
+        "Filmmuseum",
         "Metro Kinokulturhaus"
       ]
     }.freeze
 
     # Cinemas covered by dedicated crawlers — excluded from the film.at API import
     # to avoid duplicate schedules.
-    FILM_AT_EXCLUDED_CINEMAS = [ "Metro Kinokulturhaus", "Votiv Kino", "De France" ].freeze
+    FILM_AT_EXCLUDED_CINEMAS = [ "Metro Kinokulturhaus", "Votiv Kino", "De France", "Filmmuseum" ].freeze
 
     FILM_AT_API_BASE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/".freeze
 
