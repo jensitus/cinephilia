@@ -33,7 +33,13 @@
   <% end %>
 
   <div>
-    <%= movie.description %>
+    <%= simple_format(movie.description) %>
   </div>
+
+  <% if (url = safe_external_url(movie.source_url)) %>
+    <div class="mt-2">
+      <%= link_to "Mehr Infos auf filmmuseum.at →", url, target: "_blank", rel: "noopener" %>
+    </div>
+  <% end %>
 
 </div>
