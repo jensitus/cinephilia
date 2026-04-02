@@ -247,7 +247,7 @@ module Crawlers
       schiene_url  = schiene_link ? absolute_url(schiene_link["href"]) : nil
 
       strong_spans = ver_text.css("strong.avtext span.avtext").map { |s| s.text.strip }.reject(&:blank?)
-      compilation  = strong_spans.size > 1 && !strong_spans.first.match?(/\d{4}.*\d+\s*min/i)
+      compilation  = strong_spans.size > 1 && strong_spans.none? { |s| s.match?(/\d{4}/) }
 
       meta_text      = compilation ? nil : strong_spans.first
       director, year = parse_detail_meta(meta_text)

@@ -177,19 +177,29 @@ class Crawlers::FilmmuseumCrawlerServiceTest < ActiveSupport::TestCase
   # compilation detection
   # ---------------------------------------------------------------------------
 
-  test "compilation: single film with extra strong (presenter) is not a compilation" do
-    # Toy Story / Salaam Bombay case: first strong has metadata, second has presenter name
+  test "compilation: single film with presenter strong is not a compilation" do
+    # Salaam Bombay case: first strong has year, second has presenter name
     strong_spans = [
       "Mira Nair, IN/GB/FR 1988; Drehbuch: Sooni Taraporevala. 35mm, Farbe, 114 min. Hindi mit dt. UT",
       "Tom Waibel"
     ]
-    compilation = strong_spans.size > 1 && !strong_spans.first.match?(/\d{4}.*\d+\s*min/i)
+    compilation = strong_spans.size > 1 && strong_spans.none? { |s| s.match?(/\d{4}/) }
+    assert_equal false, compilation
+  end
+
+  test "compilation: single film with split metadata strongs is not a compilation" do
+    # Virgin Suicides case: first strong has year/director, second has runtime/language
+    strong_spans = [
+      "Sofia Coppola, US 1999; Drehbuch: Sofia Coppola; Kamera: Ed Lachman",
+      "35mm, Farbe, 96 min. Englisch mit dt. UT"
+    ]
+    compilation = strong_spans.size > 1 && strong_spans.none? { |s| s.match?(/\d{4}/) }
     assert_equal false, compilation
   end
 
   test "compilation: multiple short film titles is a compilation" do
     strong_spans = [ "Studio Bankside", "Journey to Avebury", "Tarot" ]
-    compilation = strong_spans.size > 1 && !strong_spans.first.match?(/\d{4}.*\d+\s*min/i)
+    compilation = strong_spans.size > 1 && strong_spans.none? { |s| s.match?(/\d{4}/) }
     assert_equal true, compilation
   end
 
