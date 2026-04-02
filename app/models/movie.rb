@@ -15,6 +15,7 @@ class Movie < ApplicationRecord
   has_many :people, through: :credits
 
   validates :movie_id, :title, presence: true
+  validates :source_url, format: { with: /\Ahttps?:\/\// }, allow_blank: true
 
   scope :currently_showing, -> {
     where("EXISTS (SELECT 1 FROM schedules WHERE schedules.movie_id = movies.id AND schedules.time >= ?)", Date.today)

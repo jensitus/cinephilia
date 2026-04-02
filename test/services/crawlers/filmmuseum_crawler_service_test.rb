@@ -229,7 +229,7 @@ class Crawlers::FilmmuseumCrawlerServiceTest < ActiveSupport::TestCase
   # ---------------------------------------------------------------------------
 
   test "parse_spielplan_meta: extracts year and director from link html" do
-    html = '<a><strong>Caché</strong><br/>2005, Michael Haneke</a>'
+    html = "<a><strong>Caché</strong><br/>2005, Michael Haneke</a>"
     link = Nokogiri::HTML(html).at_css("a")
     year, director = @crawler.send(:parse_spielplan_meta, link, "Caché")
     assert_equal "2005", year
@@ -237,7 +237,7 @@ class Crawlers::FilmmuseumCrawlerServiceTest < ActiveSupport::TestCase
   end
 
   test "parse_spielplan_meta: returns year 0 and nil director when no meta" do
-    html = '<a><strong>Caché</strong></a>'
+    html = "<a><strong>Caché</strong></a>"
     link = Nokogiri::HTML(html).at_css("a")
     year, director = @crawler.send(:parse_spielplan_meta, link, "Caché")
     assert_equal "0", year
