@@ -36,7 +36,7 @@
     <%= simple_format(movie.description) %>
   </div>
 
-  <% if movie.source_url.present? %>
+  <% if movie.source_url&.start_with?("https://", "http://") %>
     <div class="mt-2">
       <%= link_to "Mehr Infos auf filmmuseum.at →", movie.source_url, target: "_blank", rel: "noopener" %>
     </div>

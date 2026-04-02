@@ -148,6 +148,7 @@ module Crawlers
       prev_was_strong = false
 
       ver_text.children.each do |node|
+        next if node.text?
         case node.name
         when "strong"
           next unless node["class"]&.include?("avtext")
