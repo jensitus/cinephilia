@@ -62,7 +62,7 @@ module Crawlers
         sleep(0.3)
       end
 
-      screenings
+      screenings.select { |s| s[:time].to_date < cutoff }
     end
 
     def next_week_url(doc)
