@@ -34,6 +34,6 @@ module Cinephilia
 
     FILM_AT_API_BASE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/".freeze
 
-    DAYS_TO_FETCH = 3
+    DAYS_TO_FETCH = 17
   end
 end
