@@ -4,26 +4,28 @@
   <h1>Cinemas</h1>
 
   <div id="cinemas">
-    <% @cinemas.each do |cinema| %>
-      <div class="row">
-        <div class="col-md-5 mt-3">
-          <div>
-            <strong>
-              <%= link_to cinema.title, cinema %>
-            </strong>
-          </div>
+    <% grouped = @cinemas.group_by(&:county) %>
+    <% show_county_headings = grouped.size > 1 %>
+    <% grouped.each do |county, cinemas| %>
+      <% if show_county_headings %>
+        <h4 class="mt-4"><%= county %></h4>
+      <% end %>
+      <% cinemas.each do |cinema| %>
+        <div class="row">
+          <div class="col-md-5 mt-3">
+            <div>
+              <strong>
+                <%= link_to cinema.title, cinema %>
+              </strong>
+            </div>
 
-          <div>
-            <strong>County:</strong>
-            <%= cinema.county %>
-          </div>
-
-          <div>
-            <strong>Web:</strong>
-            <%= cinema.uri %>
+            <div>
+              <strong>Web:</strong>
+              <%= cinema.uri %>
+            </div>
           </div>
         </div>
-      </div>
+      <% end %>
     <% end %>
   </div>
 
