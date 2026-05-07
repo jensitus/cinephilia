@@ -4,7 +4,7 @@ class CinemasController < ApplicationController
   before_action :set_cinema_schedules, only: %i[show]
 
   def index
-    @cinemas = Cinema.in_county(current_county)
+    @cinemas = Cinema.in_county(current_county).order(:county, :title)
   end
 
   def show

@@ -15,8 +15,9 @@ module Cinephilia
 
     DEFAULT_COUNTY = "Wien".freeze
 
-    FEATURED_CINEMAS = {
-      "Wien" => [
+    FEATURED_CINEMAS = begin
+      by_county = {
+        "Wien" => [
         "Votiv Kino",
         "Top Kino",
         "De France",
@@ -31,8 +32,9 @@ module Cinephilia
         "Cinema Paradiso St. Poelten"
       ],
       "Tirol" => [
-        "Cinematograph",
-        "Leo Kino"
+        "Cinematograph Innsbruck",
+        "Leokino",
+        "Kino Fulpmes"
       ],
       "Oberösterreich" => [
         "City-Kino",
@@ -41,18 +43,31 @@ module Cinephilia
         "City Kino Steyr"
       ],
       "Salzburg" => [
-        "Das Kino"
+        "Das Kino",
+        "Lichtspiele Mittersill"
       ],
       "Steiermark" => [
-        "KIZ Royal"
+        "KIZ RoyalKino",
+        "Stadtkino Bruck an der Mur",
+        "Filmzentrum im Rechbauerkino"
       ],
       "Kärnten" => [
         "Neues Volkskino",
         "Filmstudio Villach",
         "Wulfenia Kinozentrum",
         "Volkskino Klagenfurt"
+      ],
+      "Vorarlberg" => [
+        "Cinema Dornbirn",
+        "Kino Bludenz",
+        "GUK Kino Feldkirch",
+        "Spielboden",
+        "Kinothek Lustenau"
       ]
-    }.freeze
+      }
+      all = by_county.sort_by { |county, _| county }.flat_map { |_, cinemas| cinemas }
+      by_county.merge("Österreich" => all).freeze
+    end
 
     # Cinemas covered by dedicated crawlers — excluded from the film.at API import
     # to avoid duplicate schedules.
