@@ -54,11 +54,12 @@ class SearchController < ApplicationController
       }
     end
 
-    Cinema.search(query).in_county(current_county).limit(2).each do |cinema|
+    Cinema.search(query).in_county(current_county).limit(12).each do |cinema|
+      location = [ cinema.street, cinema.city || cinema.county ].compact.join(", ")
       results << {
         type: "Cinema",
         title: cinema.title,
-        subtitle: cinema.street.presence,
+        subtitle: location.presence,
         url: cinema_path(cinema)
       }
     end

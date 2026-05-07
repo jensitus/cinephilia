@@ -11,7 +11,8 @@ class Search
     {
       movies_current: Movie.search(query).currently_showing,
       movies_archived: Movie.search(query).not_currently_showing,
-      cinemas: Cinema.search(query),
+      cinemas_active: Cinema.search(query).currently_showing,
+      cinemas_inactive: Cinema.search(query).not_currently_showing,
       genres: Genre.search(query).includes(:movies).limit(10),
       people: Person.search(query).includes(:movies)
     }

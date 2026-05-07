@@ -19,7 +19,7 @@
     </div>
     <div class="col-md-8">
       <div class="col p-2 mt-3 bg-light text-secondary rounded">
-        <%= @heading %>
+        <%= @heading %> <%= link_to "and other cinemas", cinemas_path(county: county_param) %>
       </div>
       <div class="row mb-4">
         <% @movies_with_cinemas.each do |item| %>

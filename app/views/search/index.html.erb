@@ -118,39 +118,92 @@
         <% end %>
 
         <!-- Cinemas -->
-        <% cinemas = @results[:cinemas].to_a %>
-        <% if cinemas.any? %>
-          <div class="search-section" data-controller="toggle" data-toggle-count-value="<%= [cinemas.count - 10, 0].max %>">
-            <h2>Cinemas (<%= cinemas.count %>)</h2>
-            <div class="results-list">
-              <% cinemas.first(10).each do |cinema| %>
-                <div class="result-item">
-                  <%= link_to cinema_path(cinema) do %>
-                    <h3><%= highlight_search_term(cinema.title, @query) %></h3>
-                    <% if cinema.street.present? %>
-                      <p><%= cinema.street %></p>
-                    <% end %>
-                  <% end %>
-                </div>
-              <% end %>
-              <% if cinemas.count > 10 %>
-                <div data-toggle-target="content" style="display: none;">
-                  <% cinemas.drop(10).each do |cinema| %>
+        <% cinemas_active = @results[:cinemas_active].to_a %>
+        <% cinemas_inactive = @results[:cinemas_inactive].to_a %>
+        <% if cinemas_active.any? || cinemas_inactive.any? %>
+          <div class="search-section">
+            <h2>Cinemas (<%= cinemas_active.count + cinemas_inactive.count %>)</h2>
+
+            <% if cinemas_active.any? %>
+              <div class="genre-movies-section" data-controller="toggle" data-toggle-count-value="<%= [cinemas_active.count - 10, 0].max %>" data-toggle-current-section-value="true">
+                <h4 class="subsection-title">
+                  <span class="badge badge-success">Currently Showing</span>
+                  (<%= cinemas_active.count %>)
+                </h4>
+                <div class="results-list">
+                  <% cinemas_active.first(10).each do |cinema| %>
                     <div class="result-item">
                       <%= link_to cinema_path(cinema) do %>
                         <h3><%= highlight_search_term(cinema.title, @query) %></h3>
-                        <% if cinema.street.present? %>
-                          <p><%= cinema.street %></p>
+                        <% location = [ cinema.street, cinema.city || cinema.county ].compact.join(", ") %>
+                        <% if location.present? %>
+                          <p><%= location %></p>
                         <% end %>
                       <% end %>
                     </div>
                   <% end %>
+                  <% if cinemas_active.count > 10 %>
+                    <div data-toggle-target="content" style="display: none;">
+                      <% cinemas_active.drop(10).each do |cinema| %>
+                        <div class="result-item">
+                          <%= link_to cinema_path(cinema) do %>
+                            <h3><%= highlight_search_term(cinema.title, @query) %></h3>
+                            <% location = [ cinema.street, cinema.city || cinema.county ].compact.join(", ") %>
+                            <% if location.present? %>
+                              <p><%= location %></p>
+                            <% end %>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                    <button class="toggle-movies-btn" data-toggle-target="button" data-action="click->toggle#toggle">
+                      Show <%= cinemas_active.count - 10 %> more currently showing
+                    </button>
+                  <% end %>
                 </div>
-                <button class="toggle-movies-btn" data-toggle-target="button" data-action="click->toggle#toggle">
-                  Show <%= cinemas.count - 10 %> more
-                </button>
-              <% end %>
-            </div>
+              </div>
+            <% end %>
+
+            <% if cinemas_inactive.any? %>
+              <div class="genre-movies-section" data-controller="toggle" data-toggle-count-value="<%= [cinemas_inactive.count - 10, 0].max %>">
+                <h4 class="subsection-title">
+                  <span class="badge badge-secondary">All Cinemas</span>
+                  (<%= cinemas_inactive.count %>)
+                </h4>
+                <div class="results-list">
+                  <% cinemas_inactive.first(10).each do |cinema| %>
+                    <div class="result-item">
+                      <%= link_to cinema_path(cinema) do %>
+                        <h3><%= highlight_search_term(cinema.title, @query) %></h3>
+                        <% location = [ cinema.street, cinema.city || cinema.county ].compact.join(", ") %>
+                        <% if location.present? %>
+                          <p><%= location %></p>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  <% end %>
+                  <% if cinemas_inactive.count > 10 %>
+                    <div data-toggle-target="content" style="display: none;">
+                      <% cinemas_inactive.drop(10).each do |cinema| %>
+                        <div class="result-item">
+                          <%= link_to cinema_path(cinema) do %>
+                            <h3><%= highlight_search_term(cinema.title, @query) %></h3>
+                            <% location = [ cinema.street, cinema.city || cinema.county ].compact.join(", ") %>
+                            <% if location.present? %>
+                              <p><%= location %></p>
+                            <% end %>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                    <button class="toggle-movies-btn" data-toggle-target="button" data-action="click->toggle#toggle">
+                      Show <%= cinemas_inactive.count - 10 %> more
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
           </div>
         <% end %>
 
