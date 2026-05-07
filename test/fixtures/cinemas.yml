@@ -4,6 +4,7 @@ one:
   cinema_id: cinema_1
   title: Cinema 1
   county: Wien
+  city: Wien
   uri: https://cinema_1.at
 
 two:

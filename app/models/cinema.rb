@@ -7,6 +7,10 @@ class Cinema < ApplicationRecord
   validates :cinema_id, :title, :county, presence: true
 
   scope :in_county, ->(county) { county == "Österreich" ? all : where(county: county) }
+  scope :currently_showing, -> {
+    where("EXISTS (SELECT 1 FROM schedules WHERE schedules.cinema_id = cinemas.id AND schedules.time >= ?)", Date.today)
+  }
+  scope :not_currently_showing, -> { where.not(id: currently_showing.select(:id)) }
 
   def self.get_random_movie_for_start_page(cinema)
     Movie.distinct.joins(schedules: :cinema)

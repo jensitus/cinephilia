@@ -25,6 +25,32 @@ module Cinephilia
         "Schikaneder",
         "Filmmuseum",
         "Metro Kinokulturhaus"
+      ],
+      "Niederösterreich" => [
+        "Kino im Kesselhaus",
+        "Cinema Paradiso St. Poelten"
+      ],
+      "Tirol" => [
+        "Cinematograph",
+        "Leo Kino"
+      ],
+      "Oberösterreich" => [
+        "City-Kino",
+        "Moviemento Linz",
+        "Programmkino Wels",
+        "City Kino Steyr"
+      ],
+      "Salzburg" => [
+        "Das Kino"
+      ],
+      "Steiermark" => [
+        "KIZ Royal"
+      ],
+      "Kärnten" => [
+        "Neues Volkskino",
+        "Filmstudio Villach",
+        "Wulfenia Kinozentrum",
+        "Volkskino Klagenfurt"
       ]
     }.freeze
 
