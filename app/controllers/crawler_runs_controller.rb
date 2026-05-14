@@ -6,8 +6,25 @@ class CrawlerRunsController < ApplicationController
     password: Rails.application.credentials.dig(:dashboard, :password)
   )
 
+  CRAWLED_CINEMA_CRAWLER_MAP = {
+    "t-wulfenia-kino"        => "WulfeniaKinoCrawlerService",
+    "t-cineplexx-spittal"    => "CineplexxSpittalCrawlerService",
+    "t-cinepoint-seefeld"    => "CinepointCrawlerService",
+    "t-kino-fulpmes"         => "KinoFulpmesCrawlerService",
+    "t-filmmuseum"           => "FilmmuseumCrawlerService",
+    "t-metro-kinokulturhaus" => "FilmarchivCrawlerService",
+    "t-votiv-kino"           => "VotivKinoCrawlerService",
+    "t-de-france"            => "VotivKinoCrawlerService"
+  }.freeze
+
   def index
     @runs = CrawlerRun.recent.limit(50)
+
+    cinemas_by_id = Cinema.where(cinema_id: CRAWLED_CINEMA_CRAWLER_MAP.keys).index_by(&:cinema_id)
+    @crawled_cinemas = CRAWLED_CINEMA_CRAWLER_MAP.filter_map do |cinema_id, crawler|
+      cinema = cinemas_by_id[cinema_id]
+      [ cinema, crawler ] if cinema
+    end
 
     @views_today   = PageView.humans.since(Date.today).count
     @views_7_days  = PageView.humans.since(7.days.ago).count

@@ -100,6 +100,33 @@
 
   <hr class="mb-4">
 
+  <%# ── Crawled cinemas ─────────────────────────────────────────────── %>
+  <h5 class="mb-3">Crawled cinemas</h5>
+  <table class="table table-sm table-hover align-middle mb-5">
+    <thead class="table-light">
+      <tr>
+        <th>Cinema</th>
+        <th>Crawler</th>
+        <th>Programme</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @crawled_cinemas.each do |cinema, crawler| %>
+        <tr>
+          <td><%= link_to cinema.title, cinema_path(cinema) %></td>
+          <td><code class="small text-muted"><%= crawler %></code></td>
+          <td>
+            <% if cinema.uri.present? %>
+              <%= link_to cinema.uri, cinema.uri, target: "_blank", rel: "noopener", class: "small" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <hr class="mb-4">
+
   <%# ── Crawler runs ────────────────────────────────────────────────── %>
   <h5 class="mb-3">Crawler runs</h5>
   <p class="text-muted mb-4">Last <%= @runs.size %> runs</p>
