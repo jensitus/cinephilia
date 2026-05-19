@@ -1,4 +1,9 @@
 namespace :dev do
+  desc "Run the full fetch pipeline manually (crawlers + film.at fixture)"
+  task fetch: :environment do
+    Movie.set_date
+  end
+
   desc "Reset schedules to future dates for development"
   task refresh_schedules: :environment do
     Schedule.find_each do |schedule|

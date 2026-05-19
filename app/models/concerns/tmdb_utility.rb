@@ -26,12 +26,13 @@ module TmdbUtility
     nil
   end
 
-  def self.fallback_tmdb_id(url, movie_query_title, movie_title_json, year, film_at_uri)
+  def self.fallback_tmdb_id(url, movie_query_title, movie_title_json, year, film_at_uri, director_hint = nil)
     matcher = Tmdb::MovieMatcher.new(
       original_title: movie_query_title,
       display_title: movie_title_json,
       year: year,
-      film_at_uri: film_at_uri
+      film_at_uri: film_at_uri,
+      director_hint: director_hint
     )
     matcher.find_tmdb_id
   end
@@ -66,6 +67,6 @@ module TmdbUtility
 
   def self.release_year_valid?(tmdb_release_year, year)
     return true if year == "0"
-    (year.to_i - 1..year.to_i + 1).include?(tmdb_release_year)
+    (year.to_i - 2..year.to_i + 2).include?(tmdb_release_year)
   end
 end

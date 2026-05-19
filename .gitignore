@@ -37,3 +37,4 @@
 
 .idea/
 /node_modules
+/public/film_at_fixture.json
