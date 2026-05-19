@@ -71,10 +71,13 @@ module Cinephilia
 
     # Cinemas covered by dedicated crawlers — excluded from the film.at API import
     # to avoid duplicate schedules.
-    FILM_AT_EXCLUDED_CINEMAS = [ "Metro Kinokulturhaus", "Votiv Kino", "De France", "Filmmuseum" ].freeze
+    FILM_AT_EXCLUDED_CINEMAS = [ "Metro Kinokulturhaus", "Votiv Kino", "De France", "Filmmuseum", "Cineplexx Spittal",
+                                 "Cinepoint Seefeld", "Kino Fulpmes" ].freeze
 
     FILM_AT_API_BASE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/".freeze
 
-    DAYS_TO_FETCH = 17
+    FILM_AT_FIXTURE_PATH = Rails.root.join("public", "film_at_fixture.json").freeze
+
+    DAYS_TO_FETCH = Rails.env.development? ? 1 : 17
   end
 end

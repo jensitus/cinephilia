@@ -26,9 +26,8 @@ module Crawlers
       all_sessions = fetch_json("#{API_V2_BASE}/movies/#{movie_data['id']}/sessions")
       return unless all_sessions
 
-      spittal_sessions = all_sessions
-        .flat_map { |day| day["sessions"] }
-        .select { |s| s["cinemaId"] == SPITTAL_CINEMA_ID }
+      spittal_sessions = all_sessions.flat_map { |day| day["sessions"] }
+                                     .select { |s| s["cinemaId"] == SPITTAL_CINEMA_ID }
 
       return if spittal_sessions.empty?
 

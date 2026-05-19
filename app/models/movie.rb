@@ -60,17 +60,17 @@ class Movie < ApplicationRecord
     current_date = Date.today
     end_date = Date.today + Cinephilia::Config::DAYS_TO_FETCH
     failures = []
-    crawlers = Crawlers::BaseCrawlerService.all_crawlers
-    crawlers.each do |crawler|
-      Rails.logger.info "Running #{crawler.name}..."
-      crawler.call
-    rescue StandardError => e
-      backtrace = e.backtrace&.first(5) || []
-      Rails.logger.error "#{crawler.name} failed: #{e.message}\n#{backtrace.join("\n")}"
-      failures << { crawler: crawler.name, error: e.message, backtrace: backtrace }
-    end
-    CrawlerRun.create!(ran_at: Time.current, crawler_count: crawlers.size, failures: failures)
-    CrawlerMailer.failure_report(failures).deliver_now if failures.any?
+    # crawlers = Crawlers::BaseCrawlerService.all_crawlers
+    # crawlers.each do |crawler|
+    #   Rails.logger.info "Running #{crawler.name}..."
+    #   crawler.call
+    # rescue StandardError => e
+    #   backtrace = e.backtrace&.first(5) || []
+    #   Rails.logger.error "#{crawler.name} failed: #{e.message}\n#{backtrace.join("\n")}"
+    #   failures << { crawler: crawler.name, error: e.message, backtrace: backtrace }
+    # end
+    # CrawlerRun.create!(ran_at: Time.current, crawler_count: crawlers.size, failures: failures)
+    # CrawlerMailer.failure_report(failures).deliver_now if failures.any?
     fetch_movies_for_date_range(current_date, end_date)
     Schedule.delete_old_schedules(current_date)
     Schedule.delete_schedules_without_movies
@@ -116,12 +116,11 @@ class Movie < ApplicationRecord
   end
 
   def self.fetch_and_parse_movies(url)
-    response = Net::HTTP.get(url)
-    JSON.parse(response)["result"]
-=begin
-    file = File.read("./public/2025-08-28.json")
-    JSON.parse(file)["result"]
-=end
+    if Rails.env.development?
+      JSON.parse(File.read(Cinephilia::Config::FILM_AT_FIXTURE_PATH))["result"]
+    else
+      JSON.parse(Net::HTTP.get(url))["result"]
+    end
   end
 
   def self.find_or_create_movie(movie_string_id, film_at_uri, movie_title)
@@ -134,8 +133,9 @@ class Movie < ApplicationRecord
       update_movie_with_additional_info(film_at_uri, movie)
       tmdb_id = fetch_tmdb_id(movie.original_title, movie.title, movie.year)
       if tmdb_id.blank?
+        director = get_director_from_film_at(film_at_uri)
         tmdb_url = TmdbUtility.create_movie_search_url(movie.original_title, movie.title)
-        tmdb_id = TmdbUtility.fallback_tmdb_id(tmdb_url, movie.original_title, movie.title, movie.year, film_at_uri)
+        tmdb_id = TmdbUtility.fallback_tmdb_id(tmdb_url, movie.original_title, movie.title, movie.year, film_at_uri, director)
       end
       TmdbUtility.fetch_movie_info_from_tmdb(movie, tmdb_id) if tmdb_id.present?
     end
@@ -173,6 +173,11 @@ class Movie < ApplicationRecord
     movie_query_title.presence || movie_title_json
   end
 
+  def self.get_director_from_film_at(uri)
+    return nil if uri.blank?
+    ScrapeConcerns.get_director(uri, "article div.movieDetail-cast dl dt", true)
+  end
+
   def self.try_fetch_tmdb_id(movie_query_title, movie_title_json, year)
     tmdb_url = create_tmdb_url(movie_query_title, movie_title_json)
     query_string = NormalizeAndCleanService.call(movie_query_title)
@@ -180,7 +185,14 @@ class Movie < ApplicationRecord
   end
 
   def self.create_movie_id(title)
-    "m-#{title.downcase.tr(' ', '-').gsub('---', '-').tr(',', '-')}"
+    slug = title.downcase
+                .gsub("ä", "ae").gsub("ö", "oe").gsub("ü", "ue").gsub("ß", "ss")
+                .tr(" ,:", "-")
+                .gsub(/[^a-z0-9\-]/, "")
+                .gsub(/-{2,}/, "-")
+                .gsub(/-[0-9a-f]{8}$/, "")
+                .delete_prefix("-").delete_suffix("-")
+    "m-#{slug}"
   end
 
   def self.create_tmdb_url(movie_query_title, movie_title_json)

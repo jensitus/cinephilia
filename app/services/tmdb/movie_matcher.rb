@@ -74,7 +74,7 @@ module Tmdb
 
     def year_within_range?(tmdb_release_year)
       return true if year == "0"
-      (year.to_i - 1..year.to_i + 1).include?(tmdb_release_year)
+      (year.to_i - 2..year.to_i + 2).include?(tmdb_release_year)
     end
 
     def em_dash_part_search
