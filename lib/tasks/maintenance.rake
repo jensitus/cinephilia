@@ -19,7 +19,7 @@ namespace :maintenance do
 
         next if dry_run
 
-        winner, *losers = movies.sort_by { |m| [m.tmdb_id.present? ? 0 : 1, -m.schedules.count] }
+        winner, *losers = movies.sort_by { |m| [ m.tmdb_id.present? ? 0 : 1, -m.schedules.count ] }
         losers.each { |loser| merge_movies(winner, loser) }
         winner.update_column(:movie_id, new_id)
         puts "    => kept [#{winner.id}], removed #{losers.map(&:id)}"
