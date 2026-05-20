@@ -10,6 +10,13 @@ module Crawlers
       subclasses
     end
 
+    def self.cinema_ids
+      constants.filter_map do |name|
+        val = const_get(name)
+        val if val.is_a?(String) && val.start_with?("t-")
+      end
+    end
+
     BOT_USER_AGENT = "cinephilia-bot/1.0 (+https://cinephilia.at)"
 
     private

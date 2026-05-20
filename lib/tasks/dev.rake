@@ -22,5 +22,9 @@ namespace :dev do
 
   task test_votiv_crawler: :environment do
     Crawlers::VotivKinoCrawlerService.new.call
-    end
+  end
+
+  task test_leokino_crawler: :environment do
+    Crawlers::LeokinoCrawlerService.new.call
+  end
 end
