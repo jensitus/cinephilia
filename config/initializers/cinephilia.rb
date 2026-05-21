@@ -72,7 +72,8 @@ module Cinephilia
     # Cinemas covered by dedicated crawlers — excluded from the film.at API import
     # to avoid duplicate schedules.
     FILM_AT_EXCLUDED_CINEMAS = [ "Metro Kinokulturhaus", "Votiv Kino", "De France", "Filmmuseum", "Cineplexx Spittal",
-                                 "Cinepoint Seefeld", "Kino Fulpmes", "Leokino", "Cinematograph Innsbruck" ].freeze
+                                 "Cinepoint Seefeld", "Kino Fulpmes", "Leokino", "Cinematograph Innsbruck",
+                                 "Wulfenia Kinozentrum" ].freeze
 
     FILM_AT_API_BASE_URL = "https://efs-varnish.film.at/api/v1/cfs/filmat/screenings/nested/movie/".freeze
 

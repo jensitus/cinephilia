@@ -13,7 +13,7 @@ module Crawlers
     LEO_EMAIL   = "office@leokino.at"
     LEO_PHONE   = "+43 512 56 04 70"
 
-    CINE_ID      = "t-cinematograph"
+    CINE_ID      = "t-cinematograph-innsbruck"
     CINE_TITLE   = "Cinematograph Innsbruck"
     CINE_COUNTY  = "Tirol"
     CINE_STREET  = "Museumstraße 31"
