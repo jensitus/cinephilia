@@ -1,7 +1,7 @@
 module Crawlers
   class WulfeniaKinoCrawlerService < BaseCrawlerService
-    CINEMA_ID = "t-wulfenia-kino"
-    CINEMA_TITLE = "Wulfenia Kino"
+    CINEMA_ID = "t-wulfenia-kinozentrum"
+    CINEMA_TITLE = "Wulfenia Kinozentrum"
     CINEMA_COUNTY = "Kärnten"
     CINEMA_URL = "https://www.wulfeniakino.at"
     PROGRAMME_URL = "https://www.wulfeniakino.at/programm"
