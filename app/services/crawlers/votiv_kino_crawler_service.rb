@@ -236,7 +236,11 @@ module Crawlers
       return unless schedule && category_name.present?
 
       tag = Tag.find_or_create_tag(category_name, description: @tag_descriptions&.[](category_name))
-      schedule.tags << tag unless schedule.tags.include?(tag)
+      if tag
+        schedule.tags << tag unless schedule.tags.include?(tag)
+      else
+        Rails.logger.error "#{self.class.name}: could not resolve tag '#{category_name}' for movie '#{schedule.movie&.title}'"
+      end
     end
 
     def scrape_director(detail_url)

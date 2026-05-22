@@ -201,29 +201,23 @@
             </td>
             <td>
               <% if run.failed? %>
-                <a class="btn btn-sm btn-outline-danger"
-                   data-bs-toggle="collapse"
-                   href="#run-<%= run.id %>">
-                  Details
-                </a>
+                <details>
+                  <summary class="btn btn-sm btn-outline-danger">Details</summary>
+                  <div class="mt-2">
+                    <% run.failures.each do |f| %>
+                      <div class="mb-3">
+                        <strong><%= f["crawler"] %></strong>
+                        <div class="text-danger"><%= f["error"] %></div>
+                        <% if f["backtrace"].present? %>
+                          <pre class="mt-1 p-2 bg-white border rounded small"><%= f["backtrace"].join("\n") %></pre>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </details>
               <% end %>
             </td>
           </tr>
-          <% if run.failed? %>
-            <tr class="collapse" id="run-<%= run.id %>">
-              <td colspan="4" class="bg-light">
-                <% run.failures.each do |f| %>
-                  <div class="mb-3">
-                    <strong><%= f["crawler"] %></strong>
-                    <div class="text-danger"><%= f["error"] %></div>
-                    <% if f["backtrace"].present? %>
-                      <pre class="mt-1 p-2 bg-white border rounded small"><%= f["backtrace"].join("\n") %></pre>
-                    <% end %>
-                  </div>
-                <% end %>
-              </td>
-            </tr>
-          <% end %>
         <% end %>
       </tbody>
     </table>

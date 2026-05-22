@@ -7,12 +7,16 @@ class Tag < ApplicationRecord
 
   def self.find_or_create_tag(tag_name, description: nil)
     tag_id = "t-#{tag_name.downcase.gsub(' ', '-')}"
-    tag = find_or_initialize_by(name: tag_name)
-    tag.tag_id  = tag_id
-    tag.slug    = slug_from_name(tag_name) if tag.slug.blank?
+    tag = find_by(tag_id: tag_id) || find_or_initialize_by(name: tag_name)
+    tag.tag_id      = tag_id
+    tag.name        = tag_name if tag.name.blank?
+    tag.slug        = slug_from_name(tag_name) if tag.slug.blank?
     tag.description = description if description.present?
     tag.save if tag.new_record? || tag.changed?
     tag
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
+    Rails.logger.warn "Tag.find_or_create_tag: collision for '#{tag_name}' (tag_id: #{tag_id}) — #{e.message}"
+    find_by(tag_id: tag_id) || find_by(name: tag_name)
   end
 
   def to_param
