@@ -24,7 +24,7 @@ module Tmdb
         credits:      credits,
         runtime:      movie_data&.dig("runtime"),
         year:         movie_data&.dig("release_date")&.slice(0, 4),
-        countries:    movie_data&.dig("production_countries")&.map { |c| c["iso_3166_1"] }&.join(", ")
+        countries:    movie_data&.dig("production_countries")&.map { |c| c["iso_3166_1"] == "XG" ? "DDR" : c["iso_3166_1"] }&.join(", ")
       )
 
       genre_names = movie_data&.dig("genres")&.map { |g| g["name"] }
