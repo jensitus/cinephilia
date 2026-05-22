@@ -67,6 +67,7 @@ module Crawlers
         year:           film_details[:year],
         country:        film_details[:country],
         runtime:        film_details[:runtime],
+        fassung:        film_details[:fassung],
         description:    film_details[:description],
         series_name:    film_details[:series_name],
         series_url:     film_details[:series_url]
@@ -85,7 +86,15 @@ module Crawlers
       return unless movie
 
       fill_missing_fields(movie, screening)
-      schedule = create_schedule(time: screening[:datetime].iso8601, three_d: false, ov: false, movie: movie, cinema: cinema)
+      ov_data  = parse_fassung(screening[:fassung])
+      schedule = create_schedule(
+        time:    screening[:datetime].iso8601,
+        three_d: false,
+        ov:      ov_data[:ov],
+        info:    ov_data[:info],
+        movie:   movie,
+        cinema:  cinema
+      )
       tag_series(schedule, screening[:series_name], screening[:series_url])
     end
 
@@ -136,6 +145,7 @@ module Crawlers
         country:            extract_meta(doc, "Land"),
         year:               extract_meta(doc, "Jahr"),
         runtime:            extract_runtime(doc),
+        fassung:            extract_meta(doc, "Fassung"),
         description:        extract_description(doc),
         series_url:         series_url,
         series_name:        series_name
@@ -161,6 +171,14 @@ module Crawlers
       value&.match(/(\d+)/)&.[](1)&.to_i
     end
 
+    def parse_fassung(fassung)
+      return { ov: false, info: nil } if fassung.blank?
+      return { ov: false, info: nil } unless fassung.include?("Originalfassung")
+
+      info = fassung.match?(/mit .+Untertitel/i) ? "OmU" : "OV"
+      { ov: true, info: info }
+    end
+
     def extract_description(doc)
       grid = doc.css("#submodule_id > div")[1]
       grid&.at_css("p")&.text&.strip&.gsub(/\s+/, " ")
@@ -171,7 +189,11 @@ module Crawlers
 
       description = fetch_series_description(series_url)
       tag = Tag.find_or_create_tag(series_name, description: description)
-      schedule.tags << tag unless schedule.tags.include?(tag)
+      if tag
+        schedule.tags << tag unless schedule.tags.include?(tag)
+      else
+        Rails.logger.error "#{self.class.name}: could not resolve tag '#{series_name}' for movie '#{schedule.movie&.title}'"
+      end
     end
 
     def fetch_series_description(series_url)
