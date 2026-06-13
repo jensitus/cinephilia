@@ -72,11 +72,11 @@ module Crawlers
       cinema = cinema_for(card)
       h6_text = card.at_css("h6.nomargin")&.text.to_s
       director = extract_director(h6_text)
-      ov_info = if h6_text.include?("OmU") then
+      ov_info = if h6_text.include?("OmU")
                   "OmU"
-                elsif h6_text.match?(/\bOV\b/) then
+      elsif h6_text.match?(/\bOV\b/)
                   "OV"
-                end
+      end
       ov = ov_info.present?
 
       movie = find_or_create_movie(
