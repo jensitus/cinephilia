@@ -72,7 +72,10 @@ module Crawlers
       cinema    = cinema_for(card)
       h6_text   = card.at_css("h6.nomargin")&.text.to_s
       director  = extract_director(h6_text)
-      ov        = h6_text.include?("OmU") || h6_text.match?(/\bOV\b/)
+      ov_info   = if h6_text.include?("OmU")   then "OmU"
+                  elsif h6_text.match?(/\bOV\b/) then "OV"
+                  end
+      ov        = ov_info.present?
 
       movie = find_or_create_movie(
         display_title:  title,
@@ -82,7 +85,7 @@ module Crawlers
       )
       return unless movie
 
-      schedule = create_schedule(time: time, three_d: false, ov: ov, movie: movie, cinema: cinema)
+      schedule = create_schedule(time: time, three_d: false, ov: ov, info: ov_info, movie: movie, cinema: cinema)
       tag_screening(schedule, card)
     end
 
