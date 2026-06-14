@@ -43,7 +43,7 @@ gem "bootstrap", "~> 5.3.3"
 gem "nokogiri"
 gem "httparty"
 
-gem "minitest", "~> 5.25"
+gem "minitest", "~> 6.0"
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
