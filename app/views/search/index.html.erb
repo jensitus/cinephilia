@@ -17,7 +17,7 @@
     <% end %>
 
     <% if @query.present? %>
-      <% if @results.values.flatten.any? %>
+      <% if @results.values.flatten.any? || @tmdb_only_results.any? %>
 
         <!-- Movies -->
         <% current_movies = @results[:movies_current].to_a %>
@@ -44,6 +44,9 @@
                           <span class="meta"><%= movie.year %></span>
                         <% end %>
                       <% end %>
+                      <% if (tmdb = @tmdb_by_local_movie[movie.id]) %>
+                        <%= link_to "TMDB", "https://www.themoviedb.org/movie/#{tmdb["id"]}", target: "_blank", rel: "noopener noreferrer", class: "tmdb-link" %>
+                      <% end %>
                     </div>
                   <% end %>
                   <% if current_movies.count > 10 %>
@@ -58,6 +61,9 @@
                             <% if movie.year.present? %>
                               <span class="meta"><%= movie.year %></span>
                             <% end %>
+                          <% end %>
+                          <% if (tmdb = @tmdb_by_local_movie[movie.id]) %>
+                            <%= link_to "TMDB", "https://www.themoviedb.org/movie/#{tmdb["id"]}", target: "_blank", rel: "noopener noreferrer", class: "tmdb-link" %>
                           <% end %>
                         </div>
                       <% end %>
@@ -88,6 +94,9 @@
                           <span class="meta"><%= movie.year %></span>
                         <% end %>
                       <% end %>
+                      <% if (tmdb = @tmdb_by_local_movie[movie.id]) %>
+                        <%= link_to "TMDB", "https://www.themoviedb.org/movie/#{tmdb["id"]}", target: "_blank", rel: "noopener noreferrer", class: "tmdb-link" %>
+                      <% end %>
                     </div>
                   <% end %>
                   <% if archived_movies.count > 10 %>
@@ -102,6 +111,9 @@
                             <% if movie.year.present? %>
                               <span class="meta"><%= movie.year %></span>
                             <% end %>
+                          <% end %>
+                          <% if (tmdb = @tmdb_by_local_movie[movie.id]) %>
+                            <%= link_to "TMDB", "https://www.themoviedb.org/movie/#{tmdb["id"]}", target: "_blank", rel: "noopener noreferrer", class: "tmdb-link" %>
                           <% end %>
                         </div>
                       <% end %>
@@ -375,7 +387,34 @@
           </div>
         <% end %>
 
-      <% else %>
+      <% end %>
+
+      <% if @tmdb_only_results.any? %>
+        <div class="search-section">
+          <h2>Also on TMDB</h2>
+          <div class="results-list">
+            <% @tmdb_only_results.each do |result| %>
+              <% tmdb_year = result["release_date"]&.first(4) %>
+              <div class="result-item">
+                <%= link_to "https://www.themoviedb.org/movie/#{result["id"]}", target: "_blank", rel: "noopener noreferrer" do %>
+                  <h3><%= result["title"] %></h3>
+                  <% if result["original_title"].present? && result["original_title"] != result["title"] %>
+                    <span class="original-title"><%= result["original_title"] %></span>
+                  <% end %>
+                  <% if tmdb_year.present? %>
+                    <span class="meta"><%= tmdb_year %></span>
+                  <% end %>
+                  <% if result["overview"].present? %>
+                    <p><%= truncate(result["overview"], length: 150) %></p>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% unless @results.values.flatten.any? || @tmdb_only_results.any? %>
         <p class="no-results">No results found for "<%= @query %>"</p>
       <% end %>
     <% end %>

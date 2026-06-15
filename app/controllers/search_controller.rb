@@ -13,6 +13,24 @@ class SearchController < ApplicationController
     if @results[:people]&.any?
       @results[:people] = @results[:people].includes(:movies, :credits)
     end
+
+    @tmdb_by_local_movie = {}
+    @tmdb_only_results = []
+
+    if @query.present?
+      tmdb_response = Tmdb::Client.search_movies(@query)
+      tmdb_results = tmdb_response&.dig("results") || []
+      tmdb_ids = tmdb_results.map { |r| r["id"].to_s }
+      local_by_tmdb_id = Movie.where(tmdb_id: tmdb_ids).index_by(&:tmdb_id)
+
+      tmdb_results.each do |result|
+        if (local_movie = local_by_tmdb_id[result["id"].to_s])
+          @tmdb_by_local_movie[local_movie.id] = result
+        else
+          @tmdb_only_results << result
+        end
+      end
+    end
   end
 
   def autocomplete
