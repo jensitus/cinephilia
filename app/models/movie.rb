@@ -74,6 +74,7 @@ class Movie < ApplicationRecord
     fetch_movies_for_date_range(current_date, end_date)
     Schedule.delete_old_schedules(current_date)
     Schedule.delete_schedules_without_movies
+    delete_movies_without_schedules
   end
 
   def self.delete_movies_without_schedules
