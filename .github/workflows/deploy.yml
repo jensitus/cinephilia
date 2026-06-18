@@ -30,7 +30,7 @@ jobs:
           ssh-keyscan -H 162.55.208.247 >> ~/.ssh/known_hosts
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Write secret files
         run: |
